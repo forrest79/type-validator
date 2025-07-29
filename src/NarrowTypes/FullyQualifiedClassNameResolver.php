@@ -15,6 +15,10 @@ final class FullyQualifiedClassNameResolver
 
 	public static function resolve(string $filename, string $class): string
 	{
+		if (str_starts_with($class, '\\')) {
+			return $class;
+		}
+
 		if (!isset(self::$nameContextsCache[$filename])) {
 			self::$nameContextsCache[$filename] = self::createNameContext($filename) ?? false;
 		}

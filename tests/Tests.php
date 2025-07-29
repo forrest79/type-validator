@@ -9,8 +9,20 @@ final class Tests
 
 	public static function testAll(): void
 	{
-		// Lists
+		assert(NarrowTypes::isType(1, 'int'));
+		assert(NarrowTypes::isType('string', 'string'));
+		assert(NarrowTypes::isType(1.0, 'float'));
+		assert(NarrowTypes::isType(1.0, 'double'));
+		assert(NarrowTypes::isType(true, 'bool'));
+		//assert(NarrowTypes::isType(1, 'xyz'));
+		//assert(NarrowTypes::isType(1, '$this'));
+		//assert(NarrowTypes::isType(1, 'array<'));
+		assert(NarrowTypes::isType(['a' => 1, '2' => 3], 'array'));
 
+		assert(NarrowTypes::isType([1, 3], 'int[]'));
+		assert(NarrowTypes::isType(1, 'positive-int'));
+		assert(NarrowTypes::isType(1, 'int<0, 100>'));
+exit;
 		// list<int>
 		self::classIsListInt([1, 2, 3]);
 		self::functionIsListInt([1, 2, 3]);
@@ -74,7 +86,7 @@ final class Tests
 	/**
 	 * @param list<int> $intList
 	 */
-	private static function arrayIsListIntType(array $intList): void
+	private static function arrayIsListIntType(array|int $intList): void
 	{
 		var_dump($intList);
 	}

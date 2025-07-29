@@ -2,6 +2,9 @@
 
 namespace Forrest79\NarrowTypes;
 
+use PHPStan\PhpDocParser;
+use PHPStan\PhpDocParser\ParserConfig;
+
 /**
  * @phpstan-type Type array{type: string, key?: string, value?: string, class?: string}
  */
@@ -44,10 +47,42 @@ final class TypeParser
 	private array $parts;
 
 
-	private function __construct(string $filename, string $type)
+	public static function parse(string $typeDescription): PhpDocParser\Ast\Type\TypeNode
+	{
+		$tokens = new PhpDocParser\Parser\TokenIterator(
+			(new PhpDocParser\Lexer\Lexer(self::getParserConfig()))->tokenize($typeDescription),
+		);
+
+		try {
+			return self::getTypeParser()->parse($tokens);
+		} catch (PhpDocParser\Parser\ParserException $e) {
+			return new PhpDocParser\Ast\Type\InvalidTypeNode($e);
+		}
+	}
+
+
+	private static function getTypeParser(): PhpDocParser\Parser\TypeParser
+	{
+		// @todo cache
+		$constantExpressionParser = new PhpDocParser\Parser\ConstExprParser(self::getParserConfig());
+		return new PhpDocParser\Parser\TypeParser(self::getParserConfig(), $constantExpressionParser);
+	}
+
+
+	private static function getParserConfig(): ParserConfig
+	{
+		// @todo cache
+		return new PhpDocParser\ParserConfig([]);
+	}
+
+
+
+
+
+	private function __construct(string $filename, string $typeDescription)
 	{
 		$this->filename = $filename;
-		$this->typeDescription = $type;
+		$this->typeDescription = $typeDescription;
 	}
 
 
@@ -56,6 +91,33 @@ final class TypeParser
 	 */
 	public function parseTypes(): array
 	{
+		$config = new PhpDocParser\ParserConfig([]);
+		$constantExpressionParser = new PhpDocParser\Parser\ConstExprParser($config);
+		$typeParser = new PhpDocParser\Parser\TypeParser($config, $constantExpressionParser);
+		$parser = new PhpDocParser\Parser\PhpDocParser(
+			$config,
+			$typeParser,
+			$constantExpressionParser,
+		);
+
+		//$tokens = new \PHPStan\PhpDocParser\Parser\TokenIterator((new \PHPStan\PhpDocParser\Lexer\Lexer($config))->tokenize('/** @var list<int|string> */'));
+		//$tokens = new \PHPStan\PhpDocParser\Parser\TokenIterator((new \PHPStan\PhpDocParser\Lexer\Lexer($config))->tokenize('array{0: int, 1: string}'));
+		$tokens = new PhpDocParser\Parser\TokenIterator((new PhpDocParser\Lexer\Lexer($config))->tokenize($this->typeDescription));
+
+		$parsed = $typeParser->parse($tokens);
+		var_dump($parsed);
+
+		if ($parsed instanceof PhpDocParser\Ast\Type\IdentifierTypeNode) {
+			return ['type' => $parsed->name];
+		}
+
+//		var_dump($x->getVarTagValues()[0]->type->genericTypes[0]->types);
+
+		//$y = $constantExpressionParser->parse($tokens);
+
+
+
+/*
 		$parts = \preg_split('#(\||<|>|,)#', $this->typeDescription, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
 		if (($parts === false) || ($parts === [])) {
 			$this->throwBadTypeDescription();
@@ -75,6 +137,7 @@ final class TypeParser
 		}
 
 		return $parsedTypes;
+*/
 	}
 
 
@@ -178,7 +241,7 @@ final class TypeParser
 	/**
 	 * @return list<Type>
 	 */
-	public static function parse(string $filename, string $type): array
+	public static function Xparse(string $filename, string $type): array
 	{
 		if (!isset(self::$cache[$filename][$type])) {
 			self::$cache[$filename][$type] = (new self($filename, $type))->parseTypes();
