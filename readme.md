@@ -38,7 +38,7 @@ composer require --dev forrest79/phpstan-narrow-types
 
 ## Using
 
-All simple types with correspondent `is_...` function are supported `NULL`, `int`, `float`, `string`, `bool`, `callable` and `object`. Arrays `array` and lists `list` can be defined with specified types with classic `<...>` syntax (known from PHPStan).
+All simple types with correspondent `is_...` function are supported `null`, `int`, `float`, `string`, `bool`, `callable` and `object`. Arrays `array` and lists `list` can be defined with specified types with classic `<...>` syntax (known from PHPStan).
 
 You can also use `|` operator like `int|string`.
 

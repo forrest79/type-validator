@@ -41,10 +41,10 @@ final class NarrowTypes
 			$checkType = $parsedType['type'];
 
 			if ($checkType === TypeParser::MIXED) {
-				return TRUE;
-			} else if (in_array($checkType, self::HAS_IS_FUNCTION_TYPES, TRUE)) {
-				if (call_user_func('is_' . $checkType, $value) === TRUE) {
-					return TRUE;
+				return true;
+			} else if (in_array($checkType, self::HAS_IS_FUNCTION_TYPES, true)) {
+				if (call_user_func('is_' . $checkType, $value) === true) {
+					return true;
 				}
 			} else if ($checkType === TypeParser::ARRAY) {
 				if (is_array($value)) {
@@ -56,7 +56,7 @@ final class NarrowTypes
 						}
 					}
 
-					return TRUE;
+					return true;
 				}
 			} else if ($checkType === TypeParser::LIST) {
 				if (is_array($value) && array_is_list($value)) {
@@ -68,7 +68,7 @@ final class NarrowTypes
 						}
 					}
 
-					return TRUE;
+					return true;
 				}
 			} else if ($checkType === TypeParser::OBJECT) {
 				if (is_object($value)) {
@@ -78,14 +78,14 @@ final class NarrowTypes
 						}
 					}
 
-					return TRUE;
+					return true;
 				}
 			} else {
 				throw new ShouldNotHappenException(sprintf('Invalid type to check \'%s\'.', $checkType));
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 }

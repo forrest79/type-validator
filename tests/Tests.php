@@ -16,8 +16,8 @@ final class Tests
 		self::functionIsListInt([1, 2, 3]);
 
 		// list<bool>
-		self::classIsListBool([TRUE, FALSE]);
-		self::functionIsListBool([TRUE, FALSE]);
+		self::classIsListBool([true, false]);
+		self::functionIsListBool([true, false]);
 
 		// list<\DateTimeImmutable>
 		self::classIsListObject([new \DateTimeImmutable()]);
@@ -35,25 +35,25 @@ final class Tests
 		self::classIsListArray([[1 => 1.1], [2 => 1.2]]);
 		self::functionIsListArray([[1 => 1.1], [2 => 1.2]]);
 
-		// list<string>|list<NULL>
+		// list<string>|list<null>
 		self::classIsListStringOrListNull(['a', 'b']);
 		self::functionIsListStringOrListNull(['a', 'b']);
 
-		// list<string>|list<NULL>
-		self::classIsListStringOrListNull([NULL, NULL]);
-		self::functionIsListStringOrListNull([NULL, NULL]);
+		// list<string>|list<null>
+		self::classIsListStringOrListNull([null, null]);
+		self::functionIsListStringOrListNull([null, null]);
 
 		// Arrays
 
 		// array<int, string|bool>
-		self::classIsArrayIntStringBool([1 => 'A', 2 => TRUE, 3 => 'C']);
-		self::aunctionIsArrayIntStringBool([1 => 'A', 2 => TRUE, 3 => 'C']);
+		self::classIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
+		self::aunctionIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
 
-		// array<int, string|bool>|NULL
-		self::classIsArrayIntStringBoolNullable([1 => 'A', 2 => TRUE, 3 => 'C']);
-		self::aunctionIsArrayIntStringBoolNullable([1 => 'A', 2 => TRUE, 3 => 'C']);
-		self::classIsArrayIntStringBoolNullable(NULL);
-		self::aunctionIsArrayIntStringBoolNullable(NULL);
+		// array<int, string|bool>|null
+		self::classIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
+		self::aunctionIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
+		self::classIsArrayIntStringBoolNullable(null);
+		self::aunctionIsArrayIntStringBoolNullable(null);
 	}
 
 
@@ -197,20 +197,20 @@ final class Tests
 
 	private static function classIsListStringOrListNull(mixed $arrayList): void
 	{
-		assert(NarrowTypes::isType($arrayList, 'list<string>|list<NULL>'));
+		assert(NarrowTypes::isType($arrayList, 'list<string>|list<null>'));
 		self::arrayIsListStringOrListNull($arrayList);
 	}
 
 
 	private static function functionIsListStringOrListNull(mixed $arrayList): void
 	{
-		assert(is_type($arrayList, 'list<string>|list<NULL>'));
+		assert(is_type($arrayList, 'list<string>|list<null>'));
 		self::arrayIsListStringOrListNull($arrayList);
 	}
 
 
 	/**
-	 * @param list<string>|list<NULL> $arrayList
+	 * @param list<string>|list<null> $arrayList
 	 */
 	private static function arrayIsListStringOrListNull(array $arrayList): void
 	{
@@ -243,22 +243,22 @@ final class Tests
 
 	private static function classIsArrayIntStringBoolNullable(mixed $arrayIntStringBoolNullable): void
 	{
-		assert(NarrowTypes::isType($arrayIntStringBoolNullable, 'array<int, string|bool>|NULL'));
+		assert(NarrowTypes::isType($arrayIntStringBoolNullable, 'array<int, string|bool>|null'));
 		self::arrayIsArrayIntStringBoolTypeNullable($arrayIntStringBoolNullable);
 	}
 
 
 	private static function aunctionIsArrayIntStringBoolNullable(mixed $arrayIntStringBoolNullable): void
 	{
-		assert(is_type($arrayIntStringBoolNullable, 'array<int, string|bool>|NULL'));
+		assert(is_type($arrayIntStringBoolNullable, 'array<int, string|bool>|null'));
 		self::arrayIsArrayIntStringBoolTypeNullable($arrayIntStringBoolNullable);
 	}
 
 
 	/**
-	 * @param array<int, string|bool>|NULL $arrayIntStringBoolNullable
+	 * @param array<int, string|bool>|null $arrayIntStringBoolNullable
 	 */
-	private static function arrayIsArrayIntStringBoolTypeNullable(array|NULL $arrayIntStringBoolNullable): void
+	private static function arrayIsArrayIntStringBoolTypeNullable(array|null $arrayIntStringBoolNullable): void
 	{
 		var_dump($arrayIntStringBoolNullable);
 	}

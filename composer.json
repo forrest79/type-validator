@@ -16,9 +16,10 @@
 		"nikic/php-parser": "^5.0"
  	},
 	"require-dev": {
-		"forrest79/phpcs": "^1.5",
+		"forrest79/phpcs": "^2.0",
 		"forrest79/phpcs-ignores": "^0.5",
-		"phpstan/phpstan-strict-rules": "^2.0"
+		"phpstan/phpstan-strict-rules": "^2.0",
+		"shipmonk/phpstan-rules": "^4.1"
 	},
 	"autoload": {
 		"psr-4": {
@@ -32,7 +33,7 @@
 		}
 	},
 	"scripts": {
-		"phpcs": "vendor/bin/phpcs --bootstrap=vendor/forrest79/phpcs-ignores/src/bootstrap.php -s src tests",
+		"phpcs": "vendor/bin/phpcs --bootstrap=vendor/forrest79/phpcs-ignores/src/bootstrap-outdated.php -s src tests",
 		"phpstan": "vendor/bin/phpstan analyse src tests -v",
 		"tests": "php tests/run-tests.php"
 	},

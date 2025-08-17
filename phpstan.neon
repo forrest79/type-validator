@@ -1,6 +1,7 @@
 includes:
 	- %rootDir%/conf/bleedingEdge.neon
 	- %rootDir%/../phpstan-strict-rules/rules.neon
+	- %rootDir%/../../../vendor/shipmonk/phpstan-rules/rules.neon
 
 	# Settings for tests
 	- extension.neon

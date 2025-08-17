@@ -57,7 +57,7 @@ final class TypeParser
 	public function parseTypes(): array
 	{
 		$parts = \preg_split('#(\||<|>|,)#', $this->typeDescription, -1, \PREG_SPLIT_DELIM_CAPTURE | \PREG_SPLIT_NO_EMPTY);
-		if (($parts === FALSE) || ($parts === [])) {
+		if (($parts === false) || ($parts === [])) {
 			$this->throwBadTypeDescription();
 		}
 
@@ -65,9 +65,9 @@ final class TypeParser
 
 		$parsedTypes = [];
 
-		while (TRUE) {
+		while (true) {
 			$parsedType = $this->readNextType();
-			if ($parsedType === NULL) {
+			if ($parsedType === null) {
 				break;
 			}
 
@@ -79,28 +79,28 @@ final class TypeParser
 
 
 	/**
-	 * @return Type|NULL
+	 * @return Type|null
 	 */
-	private function readNextType(): array|NULL
+	private function readNextType(): array|null
 	{
-		$parsedType = NULL;
+		$parsedType = null;
 
 		$count = count($this->parts);
 
-		$waitingForType = TRUE;
-		$readingIterable = FALSE;
+		$waitingForType = true;
+		$readingIterable = false;
 		$iterableDeep = 0;
 		$iterableType = '';
-		$iterableKeyIsRead = FALSE;
+		$iterableKeyIsRead = false;
 		for (; $this->i < $count; $this->i++) {
 			$part = trim($this->parts[$this->i]);
 
 			if ($waitingForType) {
-				if (in_array($part, ['|', '<', '>', ','], TRUE)) {
+				if (in_array($part, ['|', '<', '>', ','], true)) {
 					$this->throwBadTypeDescription();
 				}
 
-				if (in_array(strtolower($part), self::SUPPORTED_TYPES, TRUE)) {
+				if (in_array(strtolower($part), self::SUPPORTED_TYPES, true)) {
 					$parsedType = ['type' => strtolower($part)];
 				} else {
 					$parsedType = [
@@ -111,7 +111,7 @@ final class TypeParser
 					];
 				}
 
-				$waitingForType = FALSE;
+				$waitingForType = false;
 			} else if (!$readingIterable) {
 				if ($part === '|') {
 					$this->i++;
@@ -119,7 +119,7 @@ final class TypeParser
 					assert(isset($parsedType['type']));
 					return $parsedType;
 				} else if ($part === '<') {
-					if (!in_array($parsedType['type'], [self::ARRAY, self::LIST], TRUE)) {
+					if (!in_array($parsedType['type'], [self::ARRAY, self::LIST], true)) {
 						$this->throwBadTypeDescription();
 					}
 
@@ -129,7 +129,7 @@ final class TypeParser
 
 					$parsedType['value'] = self::MIXED;
 
-					$readingIterable = TRUE;
+					$readingIterable = true;
 					$iterableDeep++;
 				} else {
 					$this->throwBadTypeDescription();
@@ -140,7 +140,7 @@ final class TypeParser
 				} else if ($part === '>') {
 					$iterableDeep--;
 					if ($iterableDeep === 0) {
-						$readingIterable = FALSE;
+						$readingIterable = false;
 						$parsedType['value'] = $iterableType;
 						$iterableType = '';
 						continue;
@@ -152,7 +152,7 @@ final class TypeParser
 
 					$parsedType['key'] = $iterableType;
 					$iterableType = '';
-					$iterableKeyIsRead = TRUE;
+					$iterableKeyIsRead = true;
 					continue;
 				}
 
@@ -164,7 +164,7 @@ final class TypeParser
 			$this->throwBadTypeDescription();
 		}
 
-		assert($parsedType === NULL || isset($parsedType['type']));
+		assert($parsedType === null || isset($parsedType['type']));
 		return $parsedType;
 	}
 
