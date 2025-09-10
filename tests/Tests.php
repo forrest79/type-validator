@@ -47,13 +47,13 @@ final class Tests
 
 		// array<int, string|bool>
 		self::classIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
-		self::aunctionIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
+		self::functionIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
 
 		// array<int, string|bool>|null
 		self::classIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
-		self::aunctionIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
+		self::functionIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
 		self::classIsArrayIntStringBoolNullable(null);
-		self::aunctionIsArrayIntStringBoolNullable(null);
+		self::functionIsArrayIntStringBoolNullable(null);
 	}
 
 
@@ -225,7 +225,7 @@ final class Tests
 	}
 
 
-	private static function aunctionIsArrayIntStringBool(mixed $arrayIntStringBool): void
+	private static function functionIsArrayIntStringBool(mixed $arrayIntStringBool): void
 	{
 		assert(is_type($arrayIntStringBool, 'array<int, string|bool>'));
 		self::arrayIsArrayIntStringBoolType($arrayIntStringBool);
@@ -248,7 +248,7 @@ final class Tests
 	}
 
 
-	private static function aunctionIsArrayIntStringBoolNullable(mixed $arrayIntStringBoolNullable): void
+	private static function functionIsArrayIntStringBoolNullable(mixed $arrayIntStringBoolNullable): void
 	{
 		assert(is_type($arrayIntStringBoolNullable, 'array<int, string|bool>|null'));
 		self::arrayIsArrayIntStringBoolTypeNullable($arrayIntStringBoolNullable);
