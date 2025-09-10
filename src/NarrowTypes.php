@@ -64,7 +64,7 @@ final class NarrowTypes
 				// Basic types
 				'int', 'integer' => is_int($value),
 				'string' => is_string($value),
-				'array-key' => is_int($value) || is_array($value),
+				'array-key' => is_int($value) || is_string($value),
 				'bool', 'boolean' => is_bool($value),
 				'true' => $value === true,
 				'false' => $value === false,

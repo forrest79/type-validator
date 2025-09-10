@@ -19,6 +19,11 @@ final class Tests
 		//assert(NarrowTypes::isType(1, 'array<'));
 		assert(NarrowTypes::isType(['a' => 1, '2' => 3], 'array'));
 
+		assert(NarrowTypes::isType(0, 'array-key'));
+		assert(NarrowTypes::isType('', 'array-key'));
+		assert(!NarrowTypes::isType(false, 'array-key'));
+		assert(!NarrowTypes::isType([], 'array-key'));
+
 		assert(NarrowTypes::isType([1, 3], 'int[]'));
 		assert(NarrowTypes::isType(1, 'positive-int'));
 		assert(NarrowTypes::isType(1, 'int<0, 100>'));
