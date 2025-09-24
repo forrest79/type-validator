@@ -7,6 +7,7 @@ use Forrest79\PHPStanNarrowTypes\Helpers;
 use PHPStan\Analyser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Parser;
+use PHPStan\PhpDoc;
 use PHPStan\Type;
 use PhpParser\Error;
 use PhpParser\Node;
@@ -16,7 +17,15 @@ abstract class NarrowTypesReturnTypeExtension implements Analyser\TypeSpecifierA
 	/** @var array<string, array<string, Type\Type>> */
 	private static array $cache = [];
 
+	private PhpDoc\TypeNodeResolver $typeNodeResolver;
+
 	private Analyser\TypeSpecifier $typeSpecifier;
+
+
+	public function __construct(PhpDoc\TypeNodeResolver $typeNodeResolver)
+	{
+		$this->typeNodeResolver = $typeNodeResolver;
+	}
 
 
 	/**
@@ -40,19 +49,21 @@ abstract class NarrowTypesReturnTypeExtension implements Analyser\TypeSpecifierA
 
 		$typeDescriptionArg = $args[1]->value;
 		$typeDescriptionType = $scope->getType($args[1]->value);
-		$typeDescription = $typeDescriptionType->getConstantStrings();
+		$typeDescriptionConstantStrings = $typeDescriptionType->getConstantStrings();
 
 		try {
-			if (count($typeDescription) === 1) {
-				$valueTypeDescription = $typeDescription[0]->getValue();
+			if (count($typeDescriptionConstantStrings) === 1) {
+				$typeDescription = $typeDescriptionConstantStrings[0]->getValue();
 
-				if (!isset(self::$cache[$filename][$valueTypeDescription])) {
-					self::$cache[$filename][$valueTypeDescription] = (new Helpers\PhpStan($filename, $valueTypeDescription))->narrowTypeDescription();
+				Helpers\SupportedTypes::check($filename, $typeDescription);
+
+				if (!isset(self::$cache[$filename][$typeDescription])) {
+					self::$cache[$filename][$typeDescription] = (new Helpers\PhpStan($this->typeNodeResolver, $filename, $typeDescription))->convertToType();
 				}
 
 				return $this->typeSpecifier->create(
 					$args[0]->value,
-					self::$cache[$filename][$valueTypeDescription],
+					self::$cache[$filename][$typeDescription],
 					Analyser\TypeSpecifierContext::createTruthy(),
 					$scope,
 				);

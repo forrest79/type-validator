@@ -18,10 +18,16 @@ ignoreErrors:
 		path: src/Exceptions/UnsupportedTypeException.php
 
 	-
-		sniff: SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable
-		message: Unused variable $missingKeyIndex.
+		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
+		message: Unused parameter $nodes.
 		count: 1
-		path: src/Helpers/PhpStan.php
+		path: src/Helpers/PhpParserNamespaceResolver.php
+
+	-
+		sniff: Generic.CodeAnalysis.EmptyStatement.DetectedIf
+		message: Empty IF statement detected
+		count: 8
+		path: src/Helpers/SupportedTypes.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter

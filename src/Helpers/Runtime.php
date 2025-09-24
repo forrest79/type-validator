@@ -4,12 +4,11 @@ namespace Forrest79\PHPStanNarrowTypes\Helpers;
 
 use Forrest79\PHPStanNarrowTypes\Exceptions;
 use PHPStan\PhpDocParser\Ast;
-use PHPStan\PhpDocParser\Ast\Type;
 
 class Runtime
 {
 	/** @var array<string, bool> */
-	private static array $cache = [];
+	private array $cache = [];
 
 	private string $filename;
 
@@ -18,6 +17,8 @@ class Runtime
 
 	public function __construct(string $filename, string $typeDescription)
 	{
+		SupportedTypes::check($filename, $typeDescription);
+
 		$this->filename = $filename;
 		$this->typeDescription = $typeDescription;
 	}
@@ -25,16 +26,16 @@ class Runtime
 
 	public function check(mixed $value): bool
 	{
-		if (is_callable($value)) { // callables can't be serialized
-			return $this->checkValue($value);
-		} else {
+		try {
 			$serializedValue = serialize($value);
-			if (!isset(self::$cache[$serializedValue])) {
-				self::$cache[$serializedValue] = $this->checkValue($value);
+			if (!isset($this->cache[$serializedValue])) {
+				$this->cache[$serializedValue] = $this->checkValue($value);
 			}
+		} catch (\Throwable) { // callables can't be serialized
+			return $this->checkValue($value);
 		}
 
-		return self::$cache[$serializedValue];
+		return $this->cache[$serializedValue];
 	}
 
 
@@ -44,54 +45,100 @@ class Runtime
 	}
 
 
-	private function checkTypeNode(Type\TypeNode $typeNode, mixed $value): bool
+	private function checkTypeNode(Ast\Type\TypeNode $typeNode, mixed $value): bool
 	{
-		// https://phpstan.org/writing-php-code/phpdoc-types
-		if ($typeNode instanceof Type\IdentifierTypeNode) {
-			return match (strtolower($typeNode->name)) { // to lower?
+		// PHPStan source - src/PhpDoc/TypeNodeResolver.php + https://phpstan.org/writing-php-code/phpdoc-types
+		if ($typeNode instanceof Ast\Type\IdentifierTypeNode) {
+			$typeNodeName = strtolower($typeNode->name);
+
+			$result = match ($typeNodeName) {
 				// Basic types
-				'int', 'integer' => is_int($value),
+				'int' => is_int($value), // 'integer' can be also class name, so this type is checked later
 				'string' => is_string($value),
 				'non-empty-string' => is_string($value) && $value !== '',
-				'non-falsy-string', 'truthy-string' => is_string($value) && (bool) $value,
+				'non-empty-lowercase-string' => is_string($value) && $value !== '' && mb_strtolower($value) === $value,
+				'non-empty-uppercase-string' => is_string($value) && $value !== '' && mb_strtoupper($value) === $value,
+				'truthy-string', 'non-falsy-string' => is_string($value) && (bool) $value,
 				'lowercase-string' => is_string($value) && mb_strtolower($value) === $value,
 				'uppercase-string' => is_string($value) && mb_strtoupper($value) === $value,
 				'numeric-string' => is_string($value) && is_numeric($value),
+				'enum-string' => $value instanceof \UnitEnum,
+				'__stringandstringable' => is_string($value) || $value instanceof \Stringable || (is_object($value) && method_exists($value, '__toString')),
 				'array-key' => is_int($value) || is_string($value),
-				'bool', 'boolean' => is_bool($value),
+				'bool' => is_bool($value),
+				//'boolean' => is_bool($value), // 'boolean' can be also class name, so this type is checked later
 				'true' => $value === true,
 				'false' => $value === false,
 				'null' => $value === null,
-				'float' => is_float($value), // alias is is_double
-				'double' => is_double($value), // alias is is_float
-				'number' => is_int($value) || is_float($value), // || is_double($value), -> alias
-				'scalar' => is_scalar($value),
-				'array' => is_array($value),
+				'float' => is_float($value),
+				//'double' => is_double($value), // 'double' can be also class name, so this type is checked later
+				//'number' => is_int($value) || is_float($value), // || is_double($value), -> alias, 'number' can be also class name, so this type is checked later
+				//'numeric' => is_numeric($value), 'numeric' can be also class name, so this type is checked later
+				//'scalar' => is_scalar($value), 'scalar' can be also class name, so this type is checked later
+				'empty-scalar' => is_scalar($value) && (bool) $value === false,
+				'non-empty-scalar' => is_scalar($value) && (bool) $value === true,
+				'array', 'associative-array' => is_array($value),
+				'non-empty-array' => is_array($value) && $value !== [],
+				'list' => is_array($value) && array_is_list($value),
+				'non-empty-list' => is_array($value) && array_is_list($value) && $value !== [],
 				'iterable' => is_iterable($value),
-				'callable', 'callable-string' => is_callable($value),
+				'callable' => is_callable($value),
+				'callable-string' => is_string($value) && is_callable($value),
+				'callable-array' => is_array($value) && is_callable($value),
+				'callable-object' => is_object($value) && is_callable($value),
+				//'resource' =>  is_resource($value) || str_starts_with(get_debug_type($value), 'resource '), // 'resource' can be also class name, so this type is checked later
+				'closed-resource' => str_starts_with(get_debug_type($value), 'resource (closed)'),
 				'open-resource' => is_resource($value), // is_resource returns true only for open resource
 				'object' => is_object($value),
+				//'empty' => (bool) $value === false, // 'empty' can be also class name, so this type is checked later
 				// Mixed
 				'mixed' => true,
+				'non-empty-mixed' => (bool) $value === true,
 				// Integer ranges
 				'positive-int' => is_int($value) && $value > 0,
 				'negative-int' => is_int($value) && $value < 0,
 				'non-positive-int' => is_int($value) && $value <= 0,
 				'non-negative-int' => is_int($value) && $value >= 0,
 				'non-zero-int' => is_int($value) && $value !== 0,
-				// Not supported
-				'resource', 'closed-resource', 'pure-callable', 'void', 'never', 'never-return', 'never-returns', 'no-return', 'literal-string' => throw new Exceptions\UnsupportedTypeException($this->filename, $this->typeDescription, $typeNode),
 				// Classes and interfaces
 				'class-string' => is_string($value) && class_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
+				'interface-string' => is_string($value) && interface_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
+				'trait-string' => is_string($value) && trait_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
 				default => $this->instanceOf($typeNode->name, $value),
 			};
-		} else if ($typeNode instanceof Type\NullableTypeNode) {
+
+			if (!$result) {
+				if (self::mightBeConstant($typeNode->name) && defined($typeNode->name)) {
+					return $value === constant($typeNode->name);
+				}
+
+				if ($typeNodeName === 'integer') {
+					return is_int($value);
+				} else if ($typeNodeName === 'double') {
+					return is_double($value);
+				} else if ($typeNodeName === 'number') {
+					return is_int($value) || is_float($value);
+				} else if ($typeNodeName === 'numeric') {
+					return is_numeric($value);
+				} else if ($typeNodeName === 'boolean') {
+					return is_bool($value);
+				} else if ($typeNodeName === 'scalar') {
+					return is_scalar($value);
+				} else if ($typeNodeName === 'resource') {
+					return is_resource($value) || str_starts_with(get_debug_type($value), 'resource ');
+				} else if ($typeNodeName === 'empty') {
+					return (bool) $value === false;
+				}
+			}
+
+			return $result;
+		} else if ($typeNode instanceof Ast\Type\NullableTypeNode) {
 			if ($value === null) {
 				return true;
 			}
 
 			return $this->checkTypeNode($typeNode->type, $value);
-		} else if ($typeNode instanceof Type\ConstTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\ConstTypeNode) {
 			$constExpr = $typeNode->constExpr;
 			if ($constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
 				return is_int($value) && (string) $value === $constExpr->value;
@@ -99,10 +146,8 @@ class Runtime
 				return is_float($value) && (string) $value === $constExpr->value;
 			} else if ($constExpr instanceof Ast\ConstExpr\ConstExprStringNode) {
 				return is_string($value) && $value === $constExpr->value;
-			} else {
-				throw new Exceptions\UnsupportedTypeException($this->filename, $this->typeDescription, $typeNode);
 			}
-		} else if ($typeNode instanceof Type\ArrayTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\ArrayTypeNode) {
 			if (!is_array($value)) {
 				return false;
 			}
@@ -114,7 +159,7 @@ class Runtime
 			}
 
 			return true;
-		} else if ($typeNode instanceof Type\ArrayShapeNode) {
+		} else if ($typeNode instanceof Ast\Type\ArrayShapeNode) {
 			if (!is_array($value)) {
 				return false;
 			}
@@ -126,7 +171,7 @@ class Runtime
 					$key = $keyName->value;
 				} else if ($keyName instanceof Ast\ConstExpr\ConstExprStringNode) {
 					$key = trim($keyName->value, '\'"');
-				} else if ($keyName instanceof Type\IdentifierTypeNode) {
+				} else if ($keyName instanceof Ast\Type\IdentifierTypeNode) {
 					$key = $keyName->name;
 				} else {
 					$key = $missingKeyIndex++;
@@ -140,7 +185,7 @@ class Runtime
 			}
 
 			return true;
-		} else if ($typeNode instanceof Type\ObjectShapeNode) {
+		} else if ($typeNode instanceof Ast\Type\ObjectShapeNode) {
 			if (!is_object($value)) {
 				return false;
 			}
@@ -161,14 +206,10 @@ class Runtime
 			}
 
 			return true;
-		} else if ($typeNode instanceof Type\GenericTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\GenericTypeNode) {
 			$name = strtolower($typeNode->type->name);
 
 			if ($name === 'array' || $name === 'non-empty-array') {
-				if (count($typeNode->genericTypes) > 2) {
-					throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
-				}
-
 				if (!is_array($value)) {
 					return false;
 				}
@@ -178,7 +219,7 @@ class Runtime
 				}
 
 				foreach ($value as $key => $item) {
-					$checkItems = [$key, $item];
+					$checkItems = count($typeNode->genericTypes) === 1 ? [$item] : [$key, $item];
 					foreach ($typeNode->genericTypes as $i => $genericType) {
 						if (!$this->checkTypeNode($genericType, $checkItems[$i])) {
 							return false;
@@ -186,10 +227,6 @@ class Runtime
 					}
 				}
 			} else if ($name === 'list' || $name === 'non-empty-list') {
-				if (count($typeNode->genericTypes) !== 1) {
-					throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
-				}
-
 				if (!is_array($value) || !array_is_list($value)) {
 					return false;
 				}
@@ -204,18 +241,14 @@ class Runtime
 					}
 				}
 			} else if ($name === 'int') {
-				if (count($typeNode->genericTypes) !== 2) {
-					throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
-				}
-
 				$limits = [];
 				foreach ($typeNode->genericTypes as $genericType) {
-					if ($genericType instanceof Type\ConstTypeNode && $genericType->constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
+					if ($genericType instanceof Ast\Type\ConstTypeNode && $genericType->constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
 						$limit = (int) $genericType->constExpr->value;
-					} else if ($genericType instanceof Type\IdentifierTypeNode && in_array(strtolower($genericType->name), ['min', 'max'], true)) {
+					} else if ($genericType instanceof Ast\Type\IdentifierTypeNode && in_array(strtolower($genericType->name), ['min', 'max'], true)) {
 						$limit = strcasecmp($genericType->name, 'min') === 0 ? PHP_INT_MIN : PHP_INT_MAX;
 					} else {
-						throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
+						throw new Exceptions\ShouldNotHappenException();
 					}
 
 					$limits[] = $limit;
@@ -232,22 +265,16 @@ class Runtime
 				}
 
 				return false;
-			} else if ($name === 'class-string') {
-				if (count($typeNode->genericTypes) !== 1) {
-					throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
-				}
-
+			} else if ($name === 'class-string' || $name === 'interface-string') {
 				if (!is_string($value)) {
 					return false;
 				}
 
 				return $this->isClassStringOf($typeNode->genericTypes[0], $value);
-			} else { // key-of<...> | value-of<...> | iterable<...> | Collection<...> | Collection|Type[]
-				throw new Exceptions\UnsupportedTypeException($this->filename, $this->typeDescription, $typeNode);
 			}
 
 			return true;
-		} else if ($typeNode instanceof Type\UnionTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\UnionTypeNode) {
 			foreach ($typeNode->types as $typeNodeItem) {
 				if ($this->checkTypeNode($typeNodeItem, $value)) {
 					return true;
@@ -255,7 +282,7 @@ class Runtime
 			}
 
 			return false;
-		} else if ($typeNode instanceof Type\IntersectionTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\IntersectionTypeNode) {
 			foreach ($typeNode->types as $typeNodeItem) {
 				if (!$this->checkTypeNode($typeNodeItem, $value)) {
 					return false;
@@ -263,11 +290,9 @@ class Runtime
 			}
 
 			return true;
-		} else if ($typeNode instanceof Type\InvalidTypeNode) {
-			throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
-		} else { // Type\ThisTypeNode | Type\ConditionalTypeNode | Type\ConditionalTypeForParameterNode | Type\OffsetAccessTypeNode | Type\CallableTypeNode
-			throw new Exceptions\UnsupportedTypeException($this->filename, $this->typeDescription, $typeNode);
 		}
+
+		throw new Exceptions\ShouldNotHappenException();
 	}
 
 
@@ -278,11 +303,11 @@ class Runtime
 	}
 
 
-	private function isClassStringOf(Type\TypeNode $typeNode, string $value): bool
+	private function isClassStringOf(Ast\Type\TypeNode $typeNode, string $value): bool
 	{
-		if ($typeNode instanceof Type\IdentifierTypeNode) {
+		if ($typeNode instanceof Ast\Type\IdentifierTypeNode) {
 			return is_a($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name), true);
-		} else if ($typeNode instanceof Type\UnionTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\UnionTypeNode) {
 			foreach ($typeNode->types as $type) {
 				if ($this->isClassStringOf($type, $value)) {
 					return true;
@@ -290,7 +315,7 @@ class Runtime
 			}
 
 			return false;
-		} else if ($typeNode instanceof Type\IntersectionTypeNode) {
+		} else if ($typeNode instanceof Ast\Type\IntersectionTypeNode) {
 			foreach ($typeNode->types as $type) {
 				if (!$this->isClassStringOf($type, $value)) {
 					return false;
@@ -299,8 +324,14 @@ class Runtime
 
 			return true;
 		} else {
-			throw new Exceptions\UnsupportedTypeException($this->filename, $this->typeDescription, $typeNode);
+			throw new Exceptions\ShouldNotHappenException();
 		}
+	}
+
+
+	private static function mightBeConstant(string $name): bool
+	{
+		return preg_match('((?:^|\\\\)[A-Z_][A-Z0-9_]*$)', $name) === 1;
 	}
 
 }

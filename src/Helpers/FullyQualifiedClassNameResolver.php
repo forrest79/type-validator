@@ -35,7 +35,7 @@ class FullyQualifiedClassNameResolver
 			return null;
 		}
 
-		$parser = (new PhpParser\ParserFactory())->createForVersion(PhpParser\PhpVersion::fromComponents(8, 1));
+		$parser = (new PhpParser\ParserFactory())->createForHostVersion();
 		$traverser = new PhpParser\NodeTraverser();
 		$nameResolver = new PhpParser\NodeVisitor\NameResolver();
 		$traverser->addVisitor($nameResolver);
