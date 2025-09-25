@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStan\Type;
+namespace Forrest79\PHPStanNarrowTypes\PHPStan\Type;
 
 use PHPStan\Analyser;
 use PHPStan\Reflection;
 use PHPStan\Type;
 use PhpParser\Node;
 
-final class NarrowTypesFunctionTypeSpecifyingExtension extends NarrowTypesReturnTypeExtension implements Type\FunctionTypeSpecifyingExtension
+class NarrowTypesFunctionTypeSpecifyingExtension extends NarrowTypesReturnTypeExtension implements Type\FunctionTypeSpecifyingExtension
 {
 
 	public function isFunctionSupported(
@@ -16,7 +16,7 @@ final class NarrowTypesFunctionTypeSpecifyingExtension extends NarrowTypesReturn
 		Analyser\TypeSpecifierContext $context,
 	): bool
 	{
-		return self::isSupported($functionReflection->getName(), count($node->getArgs()));
+		return self::isMethodSupported($functionReflection->getName(), count($node->getArgs()));
 	}
 
 
@@ -27,13 +27,16 @@ final class NarrowTypesFunctionTypeSpecifyingExtension extends NarrowTypesReturn
 		Analyser\TypeSpecifierContext $context,
 	): Analyser\SpecifiedTypes
 	{
-		return $this->narrowTypes($functionReflection->getName(), $node->getArgs(), $scope);
+		return $this->narrowTypes($node->getArgs(), $scope);
 	}
 
 
-	protected static function getIsTypeName(): string
+	/**
+	 * @return list<string>
+	 */
+	protected static function getSupportedMethodsList(): array
 	{
-		return 'is_type';
+		return ['is_type'];
 	}
 
 }

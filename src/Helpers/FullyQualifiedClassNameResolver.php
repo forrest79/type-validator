@@ -1,13 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\NarrowTypes;
+namespace Forrest79\PHPStanNarrowTypes\Helpers;
 
 use PhpParser;
 
-/**
- * @phpstan-import-type Type from TypeParser
- */
-final class FullyQualifiedClassNameResolver
+class FullyQualifiedClassNameResolver
 {
 	/** @var array<string, PhpParser\NameContext|false> */
 	private static array $nameContextsCache = [];
@@ -15,6 +12,10 @@ final class FullyQualifiedClassNameResolver
 
 	public static function resolve(string $filename, string $class): string
 	{
+		if (str_starts_with($class, '\\')) {
+			return $class;
+		}
+
 		if (!isset(self::$nameContextsCache[$filename])) {
 			self::$nameContextsCache[$filename] = self::createNameContext($filename) ?? false;
 		}
@@ -34,16 +35,11 @@ final class FullyQualifiedClassNameResolver
 			return null;
 		}
 
-		$parserFactory = new PhpParser\ParserFactory();
-		$parser = method_exists($parserFactory, 'createForVersion')
-			? (new PhpParser\ParserFactory())->createForVersion(PhpParser\PhpVersion::fromComponents(8, 1)) // v5
-			: (new PhpParser\ParserFactory())->create(PhpParser\ParserFactory::PREFER_PHP7); // compatibility for Nikic\PhpParser shipped with PhpStan (v4)
+		$parser = (new PhpParser\ParserFactory())->createForVersion(PhpParser\PhpVersion::fromComponents(8, 1));
 		$traverser = new PhpParser\NodeTraverser();
 		$nameResolver = new PhpParser\NodeVisitor\NameResolver();
 		$traverser->addVisitor($nameResolver);
 		$nameContext = $nameResolver->getNameContext();
-
-		assert($parser instanceof PhpParser\Parser);
 
 		try {
 			$code = file_get_contents($filename);

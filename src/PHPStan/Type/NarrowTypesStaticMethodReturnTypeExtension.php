@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStan\Type;
+namespace Forrest79\PHPStanNarrowTypes\PHPStan\Type;
 
-use Forrest79\NarrowTypes;
+use Forrest79\PHPStanNarrowTypes\NarrowTypes;
 use PHPStan\Analyser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Type;
 use PhpParser\Node\Expr\StaticCall;
 
-final class NarrowTypesStaticMethodReturnTypeExtension extends NarrowTypesReturnTypeExtension implements Type\StaticMethodTypeSpecifyingExtension
+class NarrowTypesStaticMethodReturnTypeExtension extends NarrowTypesReturnTypeExtension implements Type\StaticMethodTypeSpecifyingExtension
 {
 
 	public function getClass(): string
@@ -24,7 +24,7 @@ final class NarrowTypesStaticMethodReturnTypeExtension extends NarrowTypesReturn
 		Analyser\TypeSpecifierContext $context,
 	): bool
 	{
-		return self::isSupported($staticMethodReflection->getName(), count($node->getArgs()));
+		return self::isMethodSupported($staticMethodReflection->getName(), count($node->getArgs()));
 	}
 
 
@@ -35,13 +35,16 @@ final class NarrowTypesStaticMethodReturnTypeExtension extends NarrowTypesReturn
 		Analyser\TypeSpecifierContext $context,
 	): Analyser\SpecifiedTypes
 	{
-		return $this->narrowTypes($staticMethodReflection->getName(), $node->getArgs(), $scope);
+		return $this->narrowTypes($node->getArgs(), $scope);
 	}
 
 
-	protected static function getIsTypeName(): string
+	/**
+	 * @return list<string>
+	 */
+	protected static function getSupportedMethodsList(): array
 	{
-		return 'isType';
+		return ['isType', 'checkType'];
 	}
 
 }

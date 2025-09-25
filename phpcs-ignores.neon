@@ -1,9 +1,45 @@
 ignoreErrors:
 	-
+		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
+		message: Do not use public properties. Use method access instead.
+		count: 2
+		path: src/Exceptions/BadDescriptionException.php
+
+	-
+		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
+		message: Do not use public properties. Use method access instead.
+		count: 1
+		path: src/Exceptions/UnsupportedTypeException.php
+
+	-
+		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
+		message: Do not use public properties. Use method access instead.
+		count: 3
+		path: src/Exceptions/UnsupportedTypeException.php
+
+	-
+		sniff: SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable
+		message: Unused variable $missingKeyIndex.
+		count: 1
+		path: src/Helpers/PhpStan.php
+
+	-
+		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
+		message: Unused parameter $functionReflection.
+		count: 1
+		path: src/PHPStan/Type/NarrowTypesFunctionTypeSpecifyingExtension.php
+
+	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $context.
 		count: 2
 		path: src/PHPStan/Type/NarrowTypesFunctionTypeSpecifyingExtension.php
+
+	-
+		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
+		message: Unused parameter $staticMethodReflection.
+		count: 1
+		path: src/PHPStan/Type/NarrowTypesStaticMethodReturnTypeExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
@@ -14,5 +50,5 @@ ignoreErrors:
 	-
 		sniff: Generic.PHP.ForbiddenFunctions.Found
 		message: 'The use of function var_dump() is forbidden'
-		count: 9
+		count: 10
 		path: tests/Tests.php

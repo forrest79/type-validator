@@ -1,10 +1,10 @@
 services:
-	Forrest79PHPStanTypeNarrowTypesFunctionTypeSpecifyingExtension:
-		class: Forrest79\PHPStan\Type\NarrowTypesFunctionTypeSpecifyingExtension
+	Forrest79PHPStanNarrowTypesFunctionTypeSpecifyingExtension:
+		class: Forrest79\PHPStanNarrowTypes\PHPStan\Type\NarrowTypesFunctionTypeSpecifyingExtension
 		tags:
 			- phpstan.typeSpecifier.functionTypeSpecifyingExtension
 
-	Forrest79PHPStanTypeNarrowTypesNarrowTypesStaticMethodReturnTypeExtension:
-		class: Forrest79\PHPStan\Type\NarrowTypesStaticMethodReturnTypeExtension
+	Forrest79PHPStanNarrowTypesNarrowTypesStaticMethodReturnTypeExtension:
+		class: Forrest79\PHPStanNarrowTypes\PHPStan\Type\NarrowTypesStaticMethodReturnTypeExtension
 		tags:
 			- phpstan.typeSpecifier.staticMethodTypeSpecifyingExtension

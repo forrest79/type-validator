@@ -8,21 +8,18 @@ includes:
 
 parameters:
 	level: max
+	excludePaths:
+		# isType() must be called only with constant string as $type, not a variable
+		- src/functions.php
 	ignoreErrors:
 		-
-			message: '#^Call to static method Forrest79\\NarrowTypes::isType\(\) with mixed and string will always evaluate to true\.$#'
-			path: %rootDir%/../../../src/functions.php
+			rawMessage: Variable property access on object.
+			identifier: property.dynamicName
 			count: 1
-		# temp version mismatch for Nikic\PhpParser v4 (shipped with PHPStan) vs v5
+			path: src/Helpers/Runtime.php
+
 		-
-			message: "#^Call to function method_exists\\(\\) with PhpParser\\\\ParserFactory and 'createForVersion' will always evaluate to true\\.$#"
-			path: %rootDir%/../../../src/NarrowTypes/FullyQualifiedClassNameResolver.php
+			rawMessage: Creating new PHPStan\Parser\ParserErrorsException is not covered by backward compatibility promise. The class might change in a minor PHPStan version.
+			identifier: phpstanApi.constructor
 			count: 1
-		-
-			message: '#^Access to undefined constant PhpParser\\ParserFactory::PREFER_PHP7\.$#'
-			path: %rootDir%/../../../src/NarrowTypes/FullyQualifiedClassNameResolver.php
-			count: 1
-		-
-			message: '#^Call to an undefined method PhpParser\\ParserFactory::create\(\)\.$#'
-			path: %rootDir%/../../../src/NarrowTypes/FullyQualifiedClassNameResolver.php
-			count: 1
+			path: src/PHPStan/Type/NarrowTypesReturnTypeExtension.php

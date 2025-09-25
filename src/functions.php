@@ -4,7 +4,7 @@ if (!function_exists('is_type')) {
 
 	function is_type(mixed $variable, string $type): bool
 	{
-		return Forrest79\NarrowTypes::isType($variable, $type);
+		return Forrest79\PHPStanNarrowTypes\NarrowTypes::isType($variable, $type);
 	}
 
 }

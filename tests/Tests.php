@@ -2,15 +2,14 @@
 
 namespace Forrest79\PHPStanNarrowTypes\Tests;
 
-use Forrest79\NarrowTypes;
+use Forrest79\PHPStanNarrowTypes\Helpers;
+use Forrest79\PHPStanNarrowTypes\NarrowTypes;
 
-final class Tests
+class Tests
 {
 
 	public static function testAll(): void
 	{
-		// Lists
-
 		// list<int>
 		self::classIsListInt([1, 2, 3]);
 		self::functionIsListInt([1, 2, 3]);
@@ -23,9 +22,9 @@ final class Tests
 		self::classIsListObject([new \DateTimeImmutable()]);
 		self::functionIsListObject([new \DateTimeImmutable()]);
 
-		// list<NarrowTypes\FullyQualifiedClassNameResolver>
-		self::classIsListFqnObject([new NarrowTypes\FullyQualifiedClassNameResolver()]);
-		self::functionIsListFqnObject([new NarrowTypes\FullyQualifiedClassNameResolver()]);
+		// list<Helpers\FullyQualifiedClassNameResolver>
+		self::classIsListFqnObject([new Helpers\FullyQualifiedClassNameResolver()]);
+		self::functionIsListFqnObject([new Helpers\FullyQualifiedClassNameResolver()]);
 
 		// list<int|string>
 		self::classIsListIntString([1, 'test', 3]);
@@ -54,6 +53,9 @@ final class Tests
 		self::functionIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
 		self::classIsArrayIntStringBoolNullable(null);
 		self::functionIsArrayIntStringBoolNullable(null);
+
+		// array{foo: string, bar: int}
+		self::functionIsArrayShape(['foo' => 'A', 'bar' => 1]);
 	}
 
 
@@ -128,20 +130,20 @@ final class Tests
 
 	private static function classIsListFqnObject(mixed $objectList): void
 	{
-		assert(NarrowTypes::isType($objectList, 'list<NarrowTypes\FullyQualifiedClassNameResolver>'));
+		assert(NarrowTypes::isType($objectList, 'list<Helpers\FullyQualifiedClassNameResolver>'));
 		self::arrayIsListFqnObjectType($objectList);
 	}
 
 
 	private static function functionIsListFqnObject(mixed $objectList): void
 	{
-		assert(is_type($objectList, 'list<NarrowTypes\FullyQualifiedClassNameResolver>'));
+		assert(is_type($objectList, 'list<Helpers\FullyQualifiedClassNameResolver>'));
 		self::arrayIsListFqnObjectType($objectList);
 	}
 
 
 	/**
-	 * @param list<NarrowTypes\FullyQualifiedClassNameResolver> $objectList
+	 * @param list<Helpers\FullyQualifiedClassNameResolver> $objectList
 	 */
 	private static function arrayIsListFqnObjectType(array $objectList): void
 	{
@@ -259,6 +261,22 @@ final class Tests
 	 * @param array<int, string|bool>|null $arrayIntStringBoolNullable
 	 */
 	private static function arrayIsArrayIntStringBoolTypeNullable(array|null $arrayIntStringBoolNullable): void
+	{
+		var_dump($arrayIntStringBoolNullable);
+	}
+
+
+	private static function functionIsArrayShape(mixed $arrayShaper): void
+	{
+		assert(is_type($arrayShaper, 'array{foo: string, bar: int}'));
+		self::arrayIsArrayShape($arrayShaper);
+	}
+
+
+	/**
+	 * @param array{foo: string, bar: int} $arrayIntStringBoolNullable
+	 */
+	private static function arrayIsArrayShape(array $arrayIntStringBoolNullable): void
 	{
 		var_dump($arrayIntStringBoolNullable);
 	}
