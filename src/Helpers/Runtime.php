@@ -7,9 +7,6 @@ use PHPStan\PhpDocParser\Ast;
 
 class Runtime
 {
-	/** @var array<string, bool> */
-	private array $cache = [];
-
 	private string $filename;
 
 	private string $typeDescription;
@@ -25,21 +22,6 @@ class Runtime
 
 
 	public function check(mixed $value): bool
-	{
-		try {
-			$serializedValue = serialize($value);
-			if (!isset($this->cache[$serializedValue])) {
-				$this->cache[$serializedValue] = $this->checkValue($value);
-			}
-		} catch (\Throwable) { // callables can't be serialized
-			return $this->checkValue($value);
-		}
-
-		return $this->cache[$serializedValue];
-	}
-
-
-	private function checkValue(mixed $value): bool
 	{
 		return $this->checkTypeNode(PhpDocParser::parseType($this->typeDescription), $value);
 	}
