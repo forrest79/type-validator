@@ -56,5 +56,5 @@ ignoreErrors:
 	-
 		sniff: Generic.PHP.ForbiddenFunctions.Found
 		message: 'The use of function var_dump() is forbidden'
-		count: 10
-		path: tests/Tests.php
+		count: 1
+		path: tests/Helper.php

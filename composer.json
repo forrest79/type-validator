@@ -34,9 +34,10 @@
 		}
 	},
 	"scripts": {
-		"phpcs": "vendor/bin/phpcs --bootstrap=vendor/forrest79/phpcs-ignores/src/bootstrap-outdated.php -s src tests",
+		"phpcs": "vendor/bin/phpcs --bootstrap=vendor/forrest79/phpcs-ignores/src/bootstrap-outdated.php -q -s src tests",
 		"phpstan": "vendor/bin/phpstan clear-result-cache && vendor/bin/phpstan analyse src tests -v",
-		"tests": "php -c tests/php.ini tests/run-tests.php"
+		"tests": "php -c tests/php.ini tests/run-tests.php",
+		"tests-debug": "php -c tests/php.ini tests/run-tests.php --debug"
 	},
 	"config": {
 		"allow-plugins": {
