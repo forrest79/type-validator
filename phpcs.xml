@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="PHPStanNarrowTypes">
+<ruleset name="TypeValidator">
 	<rule ref="./vendor/forrest79/phpcs/Forrest79CodingStandard/ruleset.xml">
 		<exclude name="SlevomatCodingStandard.Classes.RequireAbstractOrFinal.ClassNeitherAbstractNorFinal"/>
 	</rule>
@@ -7,8 +7,8 @@
 	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
 		<properties>
 			<property name="rootNamespaces" type="array">
-				<element key="src" value="Forrest79\PHPStanNarrowTypes"/>
-				<element key="tests" value="Forrest79\PHPStanNarrowTypes\Tests"/>
+				<element key="src" value="Forrest79"/>
+				<element key="tests" value="Forrest79\TypeValidator\Tests"/>
 			</property>
 		</properties>
 	</rule>

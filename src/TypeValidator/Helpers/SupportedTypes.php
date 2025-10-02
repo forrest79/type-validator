@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Helpers;
+namespace Forrest79\TypeValidator\Helpers;
 
-use Forrest79\PHPStanNarrowTypes\Exceptions;
+use Forrest79\TypeValidator\Exceptions;
 use PHPStan\PhpDocParser\Ast;
 use PHPStan\PhpDocParser\Ast\Type;
 

@@ -16,10 +16,10 @@ parameters:
 			rawMessage: Variable property access on object.
 			identifier: property.dynamicName
 			count: 1
-			path: src/Helpers/Runtime.php
+			path: src/TypeValidator/Helpers/Runtime.php
 
 		-
 			rawMessage: Creating new PHPStan\Parser\ParserErrorsException is not covered by backward compatibility promise. The class might change in a minor PHPStan version.
 			identifier: phpstanApi.constructor
 			count: 1
-			path: src/PHPStan/Type/NarrowTypesReturnTypeExtension.php
+			path: src/TypeValidator/PHPStan/Type/ReturnTypeExtension.php

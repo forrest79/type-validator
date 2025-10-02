@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Helpers;
+namespace Forrest79\TypeValidator\Helpers;
 
-use Forrest79\PHPStanNarrowTypes\Exceptions;
+use Forrest79\TypeValidator\Exceptions;
 use PHPStan\PhpDocParser\Ast;
 
 class Runtime
@@ -34,8 +34,8 @@ class Runtime
 			$typeNodeName = strtolower($typeNode->name);
 
 			$result = match ($typeNodeName) {
-				// Basic types
-				'int' => is_int($value), // 'integer' can be also class name, so this type is checked later
+				'int' => is_int($value),
+				//'integer' => is_int($value), // 'integer' can be also class name, so this type is checked later
 				'string' => is_string($value),
 				'non-empty-string' => is_string($value) && $value !== '',
 				'non-empty-lowercase-string' => is_string($value) && $value !== '' && mb_strtolower($value) === $value,
@@ -44,7 +44,6 @@ class Runtime
 				'lowercase-string' => is_string($value) && mb_strtolower($value) === $value,
 				'uppercase-string' => is_string($value) && mb_strtoupper($value) === $value,
 				'numeric-string' => is_string($value) && is_numeric($value),
-				'enum-string' => $value instanceof \UnitEnum,
 				'__stringandstringable' => is_string($value) || $value instanceof \Stringable || (is_object($value) && method_exists($value, '__toString')),
 				'array-key' => is_int($value) || is_string($value),
 				'bool' => is_bool($value),
@@ -73,19 +72,17 @@ class Runtime
 				'open-resource' => is_resource($value), // is_resource returns true only for open resource
 				'object' => is_object($value),
 				//'empty' => (bool) $value === false, // 'empty' can be also class name, so this type is checked later
-				// Mixed
 				'mixed' => true,
 				'non-empty-mixed' => (bool) $value === true,
-				// Integer ranges
 				'positive-int' => is_int($value) && $value > 0,
 				'negative-int' => is_int($value) && $value < 0,
 				'non-positive-int' => is_int($value) && $value <= 0,
 				'non-negative-int' => is_int($value) && $value >= 0,
 				'non-zero-int' => is_int($value) && $value !== 0,
-				// Classes and interfaces
 				'class-string' => is_string($value) && class_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
 				'interface-string' => is_string($value) && interface_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
 				'trait-string' => is_string($value) && trait_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
+				'enum-string' => is_string($value) && enum_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
 				default => $this->instanceOf($typeNode->name, $value),
 			};
 

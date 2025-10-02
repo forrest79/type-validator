@@ -1,12 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Tests;
+namespace Forrest79\TypeValidator\Tests;
 
 use PHPStan\PhpDoc\TypeNodeResolver;
+use Tester\Assert;
+
+require __DIR__ . '/bootstrap.php';
 
 class PHPStanTypeNodeResolverTest
 {
-	private const string EXPECTED_HASH_MD5 = 'debc4a34fb97abf286f977b7e16b0191';
+	private const string EXPECTED_HASH_MD5 = '1c75bf936a33252756dd683fb1f6bd8a';
 
 
 	public static function test(): void
@@ -28,3 +31,7 @@ class PHPStanTypeNodeResolverTest
 	}
 
 }
+
+Assert::noError(function (): void {
+	PHPStanTypeNodeResolverTest::test();
+});

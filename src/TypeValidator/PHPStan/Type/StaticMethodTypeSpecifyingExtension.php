@@ -1,20 +1,20 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\PHPStan\Type;
+namespace Forrest79\TypeValidator\PHPStan\Type;
 
-use Forrest79\PHPStanNarrowTypes\NarrowTypes;
+use Forrest79\TypeValidator;
 use PHPStan\Analyser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Type;
 use PhpParser\Node\Expr\StaticCall;
 
-class NarrowTypesStaticMethodReturnTypeExtension extends NarrowTypesReturnTypeExtension implements Type\StaticMethodTypeSpecifyingExtension
+class StaticMethodTypeSpecifyingExtension extends ReturnTypeExtension implements Type\StaticMethodTypeSpecifyingExtension
 {
 
 	public function getClass(): string
 	{
-		return NarrowTypes::class;
+		return TypeValidator::class;
 	}
 
 

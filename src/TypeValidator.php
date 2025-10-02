@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes;
+namespace Forrest79;
 
-class NarrowTypes
+class TypeValidator
 {
-	/** @var array<string, array<string, Helpers\Runtime>> */
+	/** @var array<string, array<string, TypeValidator\Helpers\Runtime>> */
 	private static array $cache = [];
 
 
@@ -22,7 +22,7 @@ class NarrowTypes
 	}
 
 
-	private static function getRuntime(string $type): Helpers\Runtime
+	private static function getRuntime(string $type): TypeValidator\Helpers\Runtime
 	{
 		$filename = '';
 		foreach (debug_backtrace() as $item) {
@@ -33,7 +33,7 @@ class NarrowTypes
 		}
 
 		if (!isset(self::$cache[$filename][$type])) {
-			self::$cache[$filename][$type] = new Helpers\Runtime($filename, $type);
+			self::$cache[$filename][$type] = new TypeValidator\Helpers\Runtime($filename, $type);
 		}
 
 		return self::$cache[$filename][$type];

@@ -1,10 +1,10 @@
 services:
-	Forrest79PHPStanNarrowTypesFunctionTypeSpecifyingExtension:
-		class: Forrest79\PHPStanNarrowTypes\PHPStan\Type\NarrowTypesFunctionTypeSpecifyingExtension
+	Forrest79TypeValidatorFunctionTypeSpecifyingExtension:
+		class: Forrest79\TypeValidator\PHPStan\Type\FunctionTypeSpecifyingExtension
 		tags:
 			- phpstan.typeSpecifier.functionTypeSpecifyingExtension
 
-	Forrest79PHPStanNarrowTypesNarrowTypesStaticMethodReturnTypeExtension:
-		class: Forrest79\PHPStanNarrowTypes\PHPStan\Type\NarrowTypesStaticMethodReturnTypeExtension
+	Forrest79TypeValidatorStaticMethodTypeSpecifyingExtension:
+		class: Forrest79\TypeValidator\PHPStan\Type\StaticMethodTypeSpecifyingExtension
 		tags:
 			- phpstan.typeSpecifier.staticMethodTypeSpecifyingExtension

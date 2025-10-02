@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Helpers;
+namespace Forrest79\TypeValidator\Helpers;
 
 use PHPStan\PhpDocParser\Ast;
 use PHPStan\PhpDocParser\Lexer\Lexer;

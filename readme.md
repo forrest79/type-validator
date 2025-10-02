@@ -1,15 +1,14 @@
-# PHPStan narrowing complex array/list types with assert
+# TypeValidator
 
 [![Latest Stable Version](https://poser.pugx.org/forrest79/phpstan-narrow-types/v)](//packagist.org/packages/forrest79/phpstan-narrow-types)
 [![Monthly Downloads](https://poser.pugx.org/forrest79/phpstan-narrow-types/d/monthly)](//packagist.org/packages/forrest79/phpstan-narrow-types)
 [![License](https://poser.pugx.org/forrest79/phpstan-narrow-types/license)](//packagist.org/packages/forrest79/phpstan-narrow-types)
 [![Build](https://github.com/forrest79/phpstan-narrow-types/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/forrest79/phpstan-narrow-types/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/forrest79/type-validator/graph/badge.svg?token=QBWAKKUSN3)](https://codecov.io/gh/forrest79/type-validator)
 
 ## Introduction
 
-Check complex array/list types in runtime (via `assert`) and narrow variables for [PHPStan](https://phpstan.org/).
-
-> This library is "in proof of concept" state. It could be changed or canceled anytime. Source code and tests are written in "it is working just fine" way. Parsing types is very naive and is not well tested.
+Validate types with PHP Doc description and narrow types for [PHPStan](https://phpstan.org/).
 
 The goal of this library is to get rid of `@var` annotations. You can check complex array/list types with `assert` PHP function in the same way as for the simple types (`assert(is_int($var));`).
 
@@ -31,10 +30,10 @@ In common the `assert` function is disabled on production, so check is performed
 To use this extension, require it in [Composer](https://getcomposer.org/):
 
 ```
-composer require --dev forrest79/phpstan-narrow-types
+composer require --dev forrest79/type-validator
 ```
 
-> You probably want this extension only for dev.
+> You probably want this extension only for dev but it can be used also in production (omit `--dev`).
 
 ## Using
 

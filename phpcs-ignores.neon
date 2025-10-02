@@ -3,55 +3,55 @@ ignoreErrors:
 		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
 		message: Do not use public properties. Use method access instead.
 		count: 2
-		path: src/Exceptions/BadDescriptionException.php
+		path: src/TypeValidator/Exceptions/BadDescriptionException.php
 
 	-
 		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
 		message: Do not use public properties. Use method access instead.
 		count: 1
-		path: src/Exceptions/UnsupportedTypeException.php
+		path: src/TypeValidator/Exceptions/UnsupportedTypeException.php
 
 	-
 		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
 		message: Do not use public properties. Use method access instead.
 		count: 3
-		path: src/Exceptions/UnsupportedTypeException.php
+		path: src/TypeValidator/Exceptions/UnsupportedTypeException.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $nodes.
 		count: 1
-		path: src/Helpers/PhpParserNamespaceResolver.php
+		path: src/TypeValidator/Helpers/PhpParserNamespaceResolver.php
 
 	-
 		sniff: Generic.CodeAnalysis.EmptyStatement.DetectedIf
 		message: Empty IF statement detected
 		count: 8
-		path: src/Helpers/SupportedTypes.php
+		path: src/TypeValidator/Helpers/SupportedTypes.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $functionReflection.
 		count: 1
-		path: src/PHPStan/Type/NarrowTypesFunctionTypeSpecifyingExtension.php
+		path: src/TypeValidator/PHPStan/Type/FunctionTypeSpecifyingExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $context.
 		count: 2
-		path: src/PHPStan/Type/NarrowTypesFunctionTypeSpecifyingExtension.php
+		path: src/TypeValidator/PHPStan/Type/FunctionTypeSpecifyingExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $staticMethodReflection.
 		count: 1
-		path: src/PHPStan/Type/NarrowTypesStaticMethodReturnTypeExtension.php
+		path: src/TypeValidator/PHPStan/Type/StaticMethodTypeSpecifyingExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $context.
 		count: 2
-		path: src/PHPStan/Type/NarrowTypesStaticMethodReturnTypeExtension.php
+		path: src/TypeValidator/PHPStan/Type/StaticMethodTypeSpecifyingExtension.php
 
 	-
 		sniff: Generic.PHP.ForbiddenFunctions.Found

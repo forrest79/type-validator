@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Exceptions;
+namespace Forrest79\TypeValidator\Exceptions;
 
 class BadDescriptionException extends Exception
 {

@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\PHPStan\Type;
+namespace Forrest79\TypeValidator\PHPStan\Type;
 
 use PHPStan\Analyser;
 use PHPStan\Reflection;
 use PHPStan\Type;
 use PhpParser\Node;
 
-class NarrowTypesFunctionTypeSpecifyingExtension extends NarrowTypesReturnTypeExtension implements Type\FunctionTypeSpecifyingExtension
+class FunctionTypeSpecifyingExtension extends ReturnTypeExtension implements Type\FunctionTypeSpecifyingExtension
 {
 
 	public function isFunctionSupported(

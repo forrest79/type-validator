@@ -1,8 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\Tests;
+namespace Forrest79\TypeValidator\Tests;
 
-use Forrest79\PHPStanNarrowTypes\NarrowTypes;
+use Forrest79\TypeValidator;
+use Tester\Assert;
+
+require __DIR__ . '/bootstrap.php';
 
 class PHPStanExtensionTest
 {
@@ -17,14 +20,14 @@ class PHPStanExtensionTest
 
 	private static function testIsType(mixed $x): void
 	{
-		assert(NarrowTypes::isType($x, 'int'));
+		assert(TypeValidator::isType($x, 'int'));
 		self::checkTypeDescription($x);
 	}
 
 
 	private static function testCheck(mixed $x): void
 	{
-		NarrowTypes::checkType($x, 'int');
+		TypeValidator::checkType($x, 'int');
 		self::checkTypeDescription($x);
 	}
 
@@ -42,3 +45,7 @@ class PHPStanExtensionTest
 	}
 
 }
+
+Assert::noError(function (): void {
+	PHPStanExtensionTest::test();
+});

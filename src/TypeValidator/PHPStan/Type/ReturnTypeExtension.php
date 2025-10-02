@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\PHPStanNarrowTypes\PHPStan\Type;
+namespace Forrest79\TypeValidator\PHPStan\Type;
 
-use Forrest79\PHPStanNarrowTypes\Exceptions;
-use Forrest79\PHPStanNarrowTypes\Helpers;
+use Forrest79\TypeValidator\Exceptions;
+use Forrest79\TypeValidator\Helpers;
 use PHPStan\Analyser;
 use PHPStan\Analyser\Scope;
 use PHPStan\Parser;
@@ -12,7 +12,7 @@ use PHPStan\Type;
 use PhpParser\Error;
 use PhpParser\Node;
 
-abstract class NarrowTypesReturnTypeExtension implements Analyser\TypeSpecifierAwareExtension
+abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtension
 {
 	/** @var array<string, array<string, Type\Type>> */
 	private static array $cache = [];
