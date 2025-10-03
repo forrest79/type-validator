@@ -8,8 +8,8 @@ ignoreErrors:
 	-
 		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
 		message: Do not use public properties. Use method access instead.
-		count: 1
-		path: src/TypeValidator/Exceptions/UnsupportedTypeException.php
+		count: 2
+		path: src/TypeValidator/Exceptions/CheckException.php
 
 	-
 		sniff: SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty
@@ -18,16 +18,22 @@ ignoreErrors:
 		path: src/TypeValidator/Exceptions/UnsupportedTypeException.php
 
 	-
-		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
-		message: Unused parameter $nodes.
-		count: 1
-		path: src/TypeValidator/Helpers/PhpParserNamespaceResolver.php
-
-	-
 		sniff: Generic.CodeAnalysis.EmptyStatement.DetectedIf
 		message: Empty IF statement detected
 		count: 8
 		path: src/TypeValidator/Helpers/SupportedTypes.php
+
+	-
+		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
+		message: Unused parameter $nodes.
+		count: 1
+		path: src/TypeValidator/PHPStan/Helpers/PhpParserNamespaceResolver.php
+
+	-
+		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
+		message: Unused parameter $context.
+		count: 2
+		path: src/TypeValidator/PHPStan/Type/FunctionTypeSpecifyingExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
@@ -39,7 +45,7 @@ ignoreErrors:
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
 		message: Unused parameter $context.
 		count: 2
-		path: src/TypeValidator/PHPStan/Type/FunctionTypeSpecifyingExtension.php
+		path: src/TypeValidator/PHPStan/Type/StaticMethodTypeSpecifyingExtension.php
 
 	-
 		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
@@ -48,13 +54,98 @@ ignoreErrors:
 		path: src/TypeValidator/PHPStan/Type/StaticMethodTypeSpecifyingExtension.php
 
 	-
-		sniff: SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
-		message: Unused parameter $context.
-		count: 2
-		path: src/TypeValidator/PHPStan/Type/StaticMethodTypeSpecifyingExtension.php
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
+		count: 1
+		path: tests/FullyQualifiedClassNameResolverTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
+		count: 1
+		path: tests/PHPStanExtensionTest.php
 
 	-
 		sniff: Generic.PHP.ForbiddenFunctions.Found
 		message: 'The use of function var_dump() is forbidden'
 		count: 1
-		path: tests/Helper.php
+		path: tests/PHPStanExtensionTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
+		count: 1
+		path: tests/PHPStanTypeNodeResolverTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
+		count: 1
+		path: tests/PhpDocParserTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
+		count: 1
+		path: tests/PHPStanTest.php
+
+	-
+		sniff: Generic.PHP.ForbiddenFunctions.Found
+		message: 'The use of function var_dump() is forbidden'
+		count: 14
+		path: tests/PHPStanTest.php
+
+	-
+		sniff: PSR1.Classes.ClassDeclaration.MultipleClasses
+		message: Each class must be in a file by itself
+		count: 3
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: PSR1.Classes.ClassDeclaration.MultipleClasses
+		message: Each enum must be in a file by itself
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix
+		message: Superfluous suffix "Trait".
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: Squiz.Classes.ClassFileName.NoMatch
+		message: Filename doesn't match class name; expected file name "TestStringableAndJsonSerialize.php"
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: Squiz.Classes.ClassFileName.NoMatch
+		message: Filename doesn't match class name; expected file name "TestToString.php"
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: Squiz.Classes.ClassFileName.NoMatch
+		message: Filename doesn't match enum name; expected file name "TestEnum.php"
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: Squiz.Classes.ClassFileName.NoMatch
+		message: Filename doesn't match trait name; expected file name "TestTrait.php"
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
+		count: 1
+		path: tests/SupportedTypesTest.php
+

@@ -105,8 +105,16 @@ class SupportedTypes
 					}
 				}
 			} else if ($name === 'int-mask') {
-				foreach ($typeNode->genericTypes as $genericType) {
-					$this->checkTypeNode($genericType);
+				if (count($typeNode->genericTypes) === 1 && $typeNode->genericTypes[0] instanceof Ast\Type\UnionTypeNode) {
+					$maskTypes = $typeNode->genericTypes[0]->types;
+				} else {
+					$maskTypes = $typeNode->genericTypes;
+				}
+
+				foreach ($maskTypes as $maskType) {
+					if (($maskType instanceof Ast\Type\ConstTypeNode && !$maskType->constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) || !$maskType instanceof Ast\Type\ConstTypeNode) {
+						throw new Exceptions\BadDescriptionException($this->filename, $this->typeDescription);
+					}
 				}
 			} else if ($name === 'class-string' || $name === 'interface-string') {
 				if (count($typeNode->genericTypes) !== 1) {

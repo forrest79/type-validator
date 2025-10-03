@@ -4,8 +4,8 @@ namespace Forrest79\TypeValidator\PHPStan\Type;
 
 use Forrest79\TypeValidator\Exceptions;
 use Forrest79\TypeValidator\Helpers;
+use Forrest79\TypeValidator\PHPStan;
 use PHPStan\Analyser;
-use PHPStan\Analyser\Scope;
 use PHPStan\Parser;
 use PHPStan\PhpDoc;
 use PHPStan\Type;
@@ -43,7 +43,7 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 	/**
 	 * @param array<Node\Arg> $args [0] = checked variable, [1] = type description
 	 */
-	protected function narrowTypes(array $args, Scope $scope): Analyser\SpecifiedTypes
+	protected function narrowTypes(array $args, Analyser\Scope $scope): Analyser\SpecifiedTypes
 	{
 		$filename = $scope->getFile();
 
@@ -58,7 +58,7 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 				Helpers\SupportedTypes::check($filename, $typeDescription);
 
 				if (!isset(self::$cache[$filename][$typeDescription])) {
-					self::$cache[$filename][$typeDescription] = (new Helpers\PhpStan($this->typeNodeResolver, $filename, $typeDescription))->convertToType();
+					self::$cache[$filename][$typeDescription] = (new PHPStan\Helpers\TypeConverter($this->typeNodeResolver, $filename, $typeDescription))->convertToType();
 				}
 
 				return $this->typeSpecifier->create(

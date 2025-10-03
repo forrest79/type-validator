@@ -68,8 +68,8 @@ class Runtime
 				'callable-array' => is_array($value) && is_callable($value),
 				'callable-object' => is_object($value) && is_callable($value),
 				//'resource' =>  is_resource($value) || str_starts_with(get_debug_type($value), 'resource '), // 'resource' can be also class name, so this type is checked later
-				'closed-resource' => str_starts_with(get_debug_type($value), 'resource (closed)'),
 				'open-resource' => is_resource($value), // is_resource returns true only for open resource
+				'closed-resource' => str_starts_with(get_debug_type($value), 'resource (closed)'),
 				'object' => is_object($value),
 				//'empty' => (bool) $value === false, // 'empty' can be also class name, so this type is checked later
 				'mixed' => true,
@@ -79,10 +79,10 @@ class Runtime
 				'non-positive-int' => is_int($value) && $value <= 0,
 				'non-negative-int' => is_int($value) && $value >= 0,
 				'non-zero-int' => is_int($value) && $value !== 0,
-				'class-string' => is_string($value) && class_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				'interface-string' => is_string($value) && interface_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				'trait-string' => is_string($value) && trait_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				'enum-string' => is_string($value) && enum_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
+				'class-string' => is_string($value) && class_exists($value),
+				'interface-string' => is_string($value) && interface_exists($value),
+				'trait-string' => is_string($value) && trait_exists($value),
+				'enum-string' => is_string($value) && enum_exists($value),
 				default => $this->instanceOf($typeNode->name, $value),
 			};
 
@@ -220,6 +220,10 @@ class Runtime
 					}
 				}
 			} else if ($name === 'int') {
+				if (!is_int($value)) {
+					return false;
+				}
+
 				$limits = [];
 				foreach ($typeNode->genericTypes as $genericType) {
 					if ($genericType instanceof Ast\Type\ConstTypeNode && $genericType->constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
@@ -233,13 +237,30 @@ class Runtime
 					$limits[] = $limit;
 				}
 
-				if (!is_int($value) || $value < $limits[0] || $value > $limits[1]) {
+				if ($value < $limits[0] || $value > $limits[1]) {
 					return false;
 				}
 			} else if ($name === 'int-mask') {
-				foreach ($typeNode->genericTypes as $genericType) {
-					if ($this->checkTypeNode($genericType, $value)) {
-						return true;
+				if (!is_int($value)) {
+					return false;
+				} else if ($value === 0) {
+					return true;
+				}
+
+				if (count($typeNode->genericTypes) === 1 && $typeNode->genericTypes[0] instanceof Ast\Type\UnionTypeNode) {
+					$maskTypes = $typeNode->genericTypes[0]->types;
+				} else {
+					$maskTypes = $typeNode->genericTypes;
+				}
+
+				foreach ($maskTypes as $maskType) {
+					if ($maskType instanceof Ast\Type\ConstTypeNode && $maskType->constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
+						$mask = (int) $maskType->constExpr->value;
+						if (($value & $mask) === $mask) {
+							return true;
+						}
+					} else {
+						throw new Exceptions\ShouldNotHappenException();
 					}
 				}
 
@@ -249,7 +270,7 @@ class Runtime
 					return false;
 				}
 
-				return $this->isClassStringOf($typeNode->genericTypes[0], $value);
+				return $this->isClassStringOrInterfaceStringOf($typeNode->genericTypes[0], $value, $name === 'interface-string');
 			}
 
 			return true;
@@ -282,13 +303,15 @@ class Runtime
 	}
 
 
-	private function isClassStringOf(Ast\Type\TypeNode $typeNode, string $value): bool
+	private function isClassStringOrInterfaceStringOf(Ast\Type\TypeNode $typeNode, string $value, bool $interface): bool
 	{
 		if ($typeNode instanceof Ast\Type\IdentifierTypeNode) {
-			return is_a($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name), true);
+			return $interface
+				? is_subclass_of($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name))
+				: is_a($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name), true);
 		} else if ($typeNode instanceof Ast\Type\UnionTypeNode) {
 			foreach ($typeNode->types as $type) {
-				if ($this->isClassStringOf($type, $value)) {
+				if ($this->isClassStringOrInterfaceStringOf($type, $value, $interface)) {
 					return true;
 				}
 			}
@@ -296,7 +319,7 @@ class Runtime
 			return false;
 		} else if ($typeNode instanceof Ast\Type\IntersectionTypeNode) {
 			foreach ($typeNode->types as $type) {
-				if (!$this->isClassStringOf($type, $value)) {
+				if (!$this->isClassStringOrInterfaceStringOf($type, $value, $interface)) {
 					return false;
 				}
 			}

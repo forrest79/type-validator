@@ -41,11 +41,11 @@ class PHPStanExtensionTest
 
 	private static function checkTypeDescription(int $x): void
 	{
-		Helper::dump($x);
+		var_dump($x);
 	}
 
 }
 
-Assert::noError(function (): void {
+Assert::noError(static function (): void {
 	PHPStanExtensionTest::test();
 });

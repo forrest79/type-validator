@@ -17,7 +17,7 @@ class TypeValidator
 	public static function checkType(mixed $value, string $type): void
 	{
 		if (!self::getRuntime($type)->check($value)) {
-			throw new \InvalidArgumentException('todo');
+			throw new TypeValidator\Exceptions\CheckException($type, $value);
 		}
 	}
 

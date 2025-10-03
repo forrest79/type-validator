@@ -9,8 +9,8 @@ includes:
 parameters:
 	level: max
 	excludePaths:
-		# isType() must be called only with constant string as $type, not a variable
-		- src/functions.php
+		- src/functions.php # isType() must be called only with constant string as $type, not a variable
+		- tests/assets/incorrect.php # intentionally bad syntax
 	ignoreErrors:
 		-
 			rawMessage: Variable property access on object.
@@ -23,3 +23,1173 @@ parameters:
 			identifier: phpstanApi.constructor
 			count: 1
 			path: src/TypeValidator/PHPStan/Type/ReturnTypeExtension.php
+
+		-
+			rawMessage: 'Using (object) is discouraged, please avoid using that.'
+			identifier: shipmonk.forbiddenCast
+			count: 2
+			path: tests/PHPStanTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::checkType() with 1 and ''float'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::checkType() with 1 and ''int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''lowercase-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''non-empty-lowercase…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''non-empty-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''non-empty-uppercase…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''non-falsy-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with '''' and ''uppercase-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''0'' and ''truthy-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''1'' and ''numeric-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''1.8'' and ''numeric-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''3'' and ''numeric'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''3.3'' and ''numeric'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''A'' and ''\''A\'''' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''A'' and ''string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''A'' and ''string|null'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''B'' and ''?string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''B'' and ''\''A\'''' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''B'' and ''non-empty-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''C'' and ''non-empty-lowercase…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''D'' and ''non-empty-uppercase…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''DateTime'' and ''class-string<…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''DateTimeImmutable'' and ''class-string<…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''E'' and ''truthy-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''F'' and ''non-falsy-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestEnum'' and ''enum-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestStringableAndJsonSerialize'' and ''interface-string<…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestToString'' and ''class-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestToString'' and ''class-string<…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestTrait'' and ''trait-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''G'' and ''lowercase-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''H'' and ''uppercase-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''I'' and ''numeric-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''K'' and ''_…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''NonExistingClass'' and ''class-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''NonExistingInterface'' and ''interface-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''NonExistingTrait'' and ''trait-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''[1]'' and ''array'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''[2]'' and ''associative-array'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''[3]'' and ''non-empty-array'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''\\Stringable'' and ''interface-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''a'' and ''int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''a'' and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''a'' and ''number'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''a'' and ''numeric'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''b'' and ''integer'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''c'' and ''non-empty-lowercase…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''d'' and ''non-empty-uppercase…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''g'' and ''lowercase-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''h'' and ''uppercase-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''intval'' and ''callable-string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''key'' and ''array-key'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''text'' and ''callable'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''text'' and ''callable-string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''text'' and ''iterable'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''text'' and ''non-empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''text'' and ''scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''true'' and ''bool'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with -1 and ''negative-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with -1 and ''non-negative-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with -1 and ''non-positive-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with -1 and ''non-zero-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with -1 and ''positive-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''empty'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''int-mask<0, 1, 2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''int-mask<1, 2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''int<1, 2>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''negative-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''non-empty-scalar'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''non-negative-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''non-positive-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''non-zero-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0 and ''positive-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0.0 and ''empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 0.1 and ''non-empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''1'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''FILE_APPEND'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''_…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''array-key'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''array<int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''array{foo: int, bar…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''class-string<…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''empty'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''empty-scalar'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int-mask<1, 2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int<0, 2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int<0, max>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int<min, 2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''int[]'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''list<int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''negative-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''non-empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''non-negative-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''non-positive-int'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''non-zero-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''null'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''number'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''object{foo: int,…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''positive-int'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1 and ''string|null'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1.1 and ''1.1'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1.1 and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1.1 and ''number'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1.1 and ''scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 1.2 and ''1.1'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2 and ''1'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2 and ''?string'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2 and ''float'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2 and ''integer'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2 and ''numeric'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2.0 and ''float'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 2.2 and ''numeric'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 3 and ''double'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 3 and ''int-mask<1|2>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 3.1 and ''double'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 4 and ''int-mask<1|2>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with 8 and ''FILE_APPEND'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Closure(): true and ''callable'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Closure(): true and ''callable-object'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\RuntimeTest and ''RuntimeTest'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\TestEnum::A and ''\\BackedEnum&…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\TestStringableAndJsonSerialize and ''_…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\TestToString and ''_…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{''1'', 2} and ''list<int|string>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{''1''} and ''int[]'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{''Forrest79\\TypeValidator\\Tests\\RuntimeTest'', ''test''} and ''callable-array'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{0: 1, 3: ''key''} and ''list'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{0: 1, 3: ''key''} and ''non-empty-list'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{0: 1, key: 2} and ''array'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, ''key''} and ''list'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, ''key''} and ''non-empty-list'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2, 3} and ''iterable'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2} and ''array<int, int>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2} and ''array<int, string>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2} and ''array<int>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2} and ''array<string, int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 2} and ''list<int>'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 3} and ''array{0: int, 1:…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 3} and ''array{int, int}'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1, 3} and ''non-empty-array'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1: 1} and ''list<int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1} and ''int[]'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1} and ''list<string>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{1} and ''non-empty-mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{array{foo: 1, bar: ''test''}} and ''list<array{foo: int…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: ''1''} and ''array{foo: int}'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1, bar: ''test''} and ''array{\''foo\'': int, …'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1, bar: ''test''} and ''array{\''foo\'': int,…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1, bar: ''test''} and ''array{foo: int, bar…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1} and ''array{\''foo\'': int, …'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1} and ''array{foo: int, bar…'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{key: 1, 0: 2} and ''associative-array'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''list'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''non-empty-array'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''non-empty-array<int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''non-empty-list'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''non-empty-list<int>'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''non-empty-mixed'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{} and ''object'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with false and ''boolean'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with false and ''empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with false and ''false'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with false and ''true'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''?string'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''array-key'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''boolean'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''null'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''resource'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''scalar'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with null and ''string|null'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with object{foo: ''1''}&stdClass and ''object{foo: int}'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with object{foo: 1, bar: ''test''}&stdClass and ''object{\''foo\'': int, …'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with object{foo: 1}&stdClass and ''object{\''foo\'': int, …'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with resource and ''closed-resource'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with resource and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with resource and ''open-resource'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with resource and ''resource'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 2
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with stdClass and ''callable-object'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''bool'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''false'' will always evaluate to false.'
+			identifier: staticMethod.impossibleType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''mixed'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''non-empty-scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''scalar'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with true and ''true'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: Trait Forrest79\TypeValidator\Tests\TestTrait is used zero times and is not analysed.
+			identifier: trait.unused
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
+			rawMessage: 'Using (object) is discouraged, please avoid using that.'
+			identifier: shipmonk.forbiddenCast
+			count: 7
+			path: tests/RuntimeTest.php

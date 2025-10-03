@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Forrest79\TypeValidator\Helpers;
+namespace Forrest79\TypeValidator\PHPStan\Helpers;
 
 use PHPStan\Analyser;
 use PhpParser;

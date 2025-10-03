@@ -3,7 +3,6 @@
 namespace Forrest79\TypeValidator\Tests;
 
 use Forrest79\TypeValidator;
-use Forrest79\TypeValidator\Helpers;
 use Tester\Assert;
 
 require __DIR__ . '/bootstrap.php';
@@ -12,6 +11,32 @@ class RuntimeTest
 {
 
 	public static function test(): void
+	{
+		self::testCheck();
+		self::testBasicTypes();
+		self::testNullableTypes();
+		self::testConstTypes();
+		self::testArrayType();
+		self::testObjectType();
+		self::testIntType();
+		self::testClassStringInterfaceStringType();
+		self::testComplexType();
+	}
+
+
+	private static function testCheck(): void
+	{
+		Assert::noError(static function (): void {
+			TypeValidator::checkType(1, 'int');
+		});
+
+		Assert::error(static function (): void {
+			TypeValidator::checkType(1, 'float');
+		}, TypeValidator\Exceptions\CheckException::class);
+	}
+
+
+	private static function testBasicTypes(): void
 	{
 		// int / integer / float / double / number / numeric / positive-int / negative-int / non-positive-int / non-negative-int / non-zero-int
 		assert(TypeValidator::isType(1, 'int'));
@@ -71,7 +96,7 @@ class RuntimeTest
 		assert(TypeValidator::isType('1.8', 'numeric-string'));
 		assert(!TypeValidator::isType('I', 'numeric-string'));
 		assert(TypeValidator::isType('K', '__stringandstringable'));
-		assert(TypeValidator::isType(new TestStringable(), '__stringandstringable'));
+		assert(TypeValidator::isType(new TestStringableAndJsonSerialize(), '__stringandstringable'));
 		assert(TypeValidator::isType(new TestToString(), '__stringandstringable'));
 		assert(!TypeValidator::isType(1, '__stringandstringable'));
 
@@ -105,291 +130,202 @@ class RuntimeTest
 		assert(TypeValidator::isType('key', 'array-key'));
 		assert(!TypeValidator::isType(null, 'array-key'));
 
-		// enum-string
-		assert(TypeValidator::isType('TestEnum', 'enum-string'));
-		assert(!TypeValidator::isType(\DateTime::class, 'enum-string'));
+		// scalar / empty-scalar / non-empty-scalar
+		assert(TypeValidator::isType(1, 'scalar'));
+		assert(TypeValidator::isType(1.1, 'scalar'));
+		assert(TypeValidator::isType(true, 'scalar'));
+		assert(TypeValidator::isType('text', 'scalar'));
+		assert(!TypeValidator::isType(null, 'scalar'));
+		assert(TypeValidator::isType(0, 'empty-scalar'));
+		assert(TypeValidator::isType(0.0, 'empty-scalar'));
+		assert(TypeValidator::isType(false, 'empty-scalar'));
+		assert(TypeValidator::isType('', 'empty-scalar'));
+		assert(!TypeValidator::isType(1, 'empty-scalar'));
+		assert(TypeValidator::isType(1, 'non-empty-scalar'));
+		assert(TypeValidator::isType(0.1, 'non-empty-scalar'));
+		assert(TypeValidator::isType(true, 'non-empty-scalar'));
+		assert(TypeValidator::isType('text', 'non-empty-scalar'));
+		assert(!TypeValidator::isType(0, 'non-empty-scalar'));
 
+		// class-string / interface-string / trait-string / enum-string
+		assert(TypeValidator::isType(TestToString::class, 'class-string'));
+		assert(!TypeValidator::isType('NonExistingClass', 'class-string'));
+		assert(TypeValidator::isType('\Stringable', 'interface-string'));
+		assert(!TypeValidator::isType('NonExistingInterface', 'interface-string'));
+		assert(TypeValidator::isType(TestTrait::class, 'trait-string'));
+		assert(!TypeValidator::isType('NonExistingTrait', 'trait-string'));
+		assert(TypeValidator::isType(TestEnum::class, 'enum-string'));
+		assert(!TypeValidator::isType('NonExistingEnum', 'enum-string'));
+
+		// iterable
+		assert(TypeValidator::isType([1, 2, 3], 'iterable'));
+		assert(!TypeValidator::isType('text', 'iterable'));
+
+		// callable / callable-string / callable-array / callable-object
+		assert(TypeValidator::isType(static fn (): bool => true, 'callable'));
+		assert(!TypeValidator::isType('text', 'callable'));
+		assert(TypeValidator::isType('intval', 'callable-string'));
+		assert(!TypeValidator::isType('text', 'callable-string'));
+		assert(TypeValidator::isType([self::class, 'test'], 'callable-array'));
+		assert(!TypeValidator::isType([1, 2], 'callable-array'));
+		assert(TypeValidator::isType(\Closure::fromCallable(static fn (): bool => true), 'callable-object'));
+		assert(!TypeValidator::isType(new \stdClass(), 'callable-object'));
+
+		// resource / open-resource / closed-resource
+		$openResource = fopen('php://memory', 'rw');
+		assert($openResource !== false);
+
+		$closedResource = fopen('php://memory', 'rw');
+		assert($closedResource !== false);
+		fclose($closedResource);
+
+		assert(TypeValidator::isType($openResource, 'resource'));
+		assert(TypeValidator::isType($closedResource, 'resource'));
+		assert(!TypeValidator::isType(null, 'resource'));
+		assert(TypeValidator::isType($openResource, 'open-resource'));
+		assert(!TypeValidator::isType($closedResource, 'open-resource'));
+		assert(TypeValidator::isType($closedResource, 'closed-resource'));
+		assert(!TypeValidator::isType($openResource, 'closed-resource'));
+
+		// object
+		assert(TypeValidator::isType(new \stdClass(), 'object'));
+		assert(!TypeValidator::isType([], 'object'));
+		assert(TypeValidator::isType(new \stdClass(), '\stdClass'));
+		assert(TypeValidator::isType(new self(), 'RuntimeTest'));
+
+		// mixed / non-empty-mixed
+		assert(TypeValidator::isType('a', 'mixed'));
+		assert(TypeValidator::isType(1, 'mixed'));
+		assert(TypeValidator::isType(1.1, 'mixed'));
+		assert(TypeValidator::isType(true, 'mixed'));
+		assert(TypeValidator::isType(null, 'mixed'));
+		assert(TypeValidator::isType(new \stdClass(), 'mixed'));
+		assert(TypeValidator::isType([], 'mixed'));
+		assert(TypeValidator::isType($openResource, 'mixed'));
+		assert(TypeValidator::isType($closedResource, 'mixed'));
+		assert(TypeValidator::isType([1], 'non-empty-mixed'));
+		assert(!TypeValidator::isType([], 'non-empty-mixed'));
+
+		// empty
+		assert(TypeValidator::isType(0, 'empty'));
+		assert(!TypeValidator::isType(1, 'empty'));
 
 		// global constant
 		assert(TypeValidator::isType(FILE_APPEND, 'FILE_APPEND'));
 		assert(!TypeValidator::isType(1, 'FILE_APPEND'));
-/*
-				//'scalar' => is_scalar($value), 'scalar' can be also class name, so this type is checked later
-				'empty-scalar' => is_scalar($value) && (bool) $value === false,
-				'non-empty-scalar' => is_scalar($value) && (bool) $value === true,
-				'iterable' => is_iterable($value),
-				'callable' => is_callable($value),
-				'callable-string' => is_string($value) && is_callable($value),
-				'callable-array' => is_array($value) && is_callable($value),
-				'callable-object' => is_object($value) && is_callable($value),
-				//'resource' =>  is_resource($value) || str_starts_with(get_debug_type($value), 'resource '), // 'resource' can be also class name, so this type is checked later
-				'closed-resource' => str_starts_with(get_debug_type($value), 'resource (closed)'),
-				'open-resource' => is_resource($value), // is_resource returns true only for open resource
-				'object' => is_object($value),
-				//'empty' => (bool) $value === false, // 'empty' can be also class name, so this type is checked later
-				'mixed' => true,
-				'non-empty-mixed' => (bool) $value === true,
-				'class-string' => is_string($value) && class_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				'interface-string' => is_string($value) && interface_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				'trait-string' => is_string($value) && trait_exists(FullyQualifiedClassNameResolver::resolve($this->filename, $value)),
-				default => $this->instanceOf($typeNode->name, $value),
-			};
-
-			if (!$result) {
-				} else if ($typeNodeName === 'scalar') {
-					return is_scalar($value);
-				} else if ($typeNodeName === 'resource') {
-					return is_resource($value) || str_starts_with(get_debug_type($value), 'resource ');
-				} else if ($typeNodeName === 'empty') {
-					return (bool) $value === false;
-				}
-			}
-
-		//$handle = fopen('php://memory', 'rw'); fclose($handle);
-
-		/*
-		assert(NarrowTypes::isType(1, '1|2|3'));
-		assert(NarrowTypes::isType(null, '?int'));
-		assert(NarrowTypes::isType(1, 'int'));
-		assert(NarrowTypes::isType('string', 'string'));
-		assert(NarrowTypes::isType(1.0, 'float'));
-		assert(NarrowTypes::isType(1.0, 'double'));
-		assert(NarrowTypes::isType(true, 'bool'));
-		//assert(NarrowTypes::isType(1, 'xyz'));
-		//assert(NarrowTypes::isType(1, '$this'));
-		//assert(NarrowTypes::isType(1, 'array<'));
-		assert(NarrowTypes::isType(['a' => 1, '2' => 3], 'array'));
-
-		assert(NarrowTypes::isType(0, 'array-key'));
-		assert(NarrowTypes::isType('', 'array-key'));
-		assert(!NarrowTypes::isType(false, 'array-key'));
-		assert(!NarrowTypes::isType([], 'array-key'));
-
-		assert(NarrowTypes::isType([1, 3], 'int[]'));
-		assert(NarrowTypes::isType(1, 'positive-int'));
-		//assert(NarrowTypes::isType(1, 'int<0, 100>'));
-
-		assert(NarrowTypes::isType(['foo' => 1, 'bar' => 'test'], 'array{\'foo\': int, "bar": string}'));
-		assert(NarrowTypes::isType(['foo' => 1, 'bar' => 'test'], 'array{\'foo\': int, "bar"?: string}'));
-		assert(NarrowTypes::isType(['foo' => 1], 'array{\'foo\': int, "bar"?: string}'));
-		assert(NarrowTypes::isType(['foo' => 1, 'bar' => 'test'], 'array{foo: int, bar: string}'));
-		assert(NarrowTypes::isType([1, 3], 'array{int, int}'));
-
-		assert(NarrowTypes::isType(0, 'int<-1, max>'));
-		assert(NarrowTypes::isType(new \DateTimeImmutable(), '(\DateTimeInterface&\DateTimeImmutable)|null'));
-		assert(NarrowTypes::isType(2, 'FILE_APPEND|FILE_IGNORE_NEW_LINES'));
-		assert(NarrowTypes::isType(\DateTime::class, 'class-string<\Exception|\DateTimeInterface>'));
-		assert(NarrowTypes::isType('100', 'numeric-string'));
-		assert(NarrowTypes::isType('01', 'non-falsy-string'));
-		assert(NarrowTypes::isType('abc', 'lowercase-string'));
-
-		assert(NarrowTypes::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{\'foo\': int, "bar": string}'));
-		assert(NarrowTypes::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{\'foo\': int, "bar"?: string}'));
-		assert(NarrowTypes::isType((object) ['foo' => 1], 'object{\'foo\': int, "bar"?: string}'));
-		assert(NarrowTypes::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{foo: int, bar: string}'));
-		assert(NarrowTypes::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{foo: int, bar?: string}&\stdClass'));
-
-		assert(NarrowTypes::isType(1.1, '1.1'));
-		assert(NarrowTypes::isType('bar', '\'foo\'|\'bar\''));
-
-		assert(NarrowTypes::isType(1, 'int-mask<1, 2, 4>'));
-		assert(NarrowTypes::isType(2, 'int-mask<1|2|4>'));
-		assert(NarrowTypes::isType(3, 'int-mask-of<Foo::INT_*>'));
-		*/
-
-		// list<int>
-		self::testIsListInt([1, 2, 3]);
-
-		// list<bool>
-		self::testIsListBool([true, false]);
-
-		// list<\DateTimeImmutable>
-		self::testIsListObject([new \DateTimeImmutable()]);
-
-		// list<Helpers\FullyQualifiedClassNameResolver>
-		self::testIsListFqnObject([new Helpers\FullyQualifiedClassNameResolver()]);
-
-		// list<int|string>
-		self::testIsListIntString([1, 'test', 3]);
-
-		// list<array<int, float>>
-		self::testIsListArray([[1 => 1.1], [2 => 1.2]]);
-
-		// list<string>|list<null>
-		self::testIsListStringOrListNull(['a', 'b']);
-
-		// list<string>|list<null>
-		self::testIsListStringOrListNull([null, null]);
-
-		// array<int, string|bool>
-		self::testIsArrayIntStringBool([1 => 'A', 2 => true, 3 => 'C']);
-
-		// array<int, string|bool>|null
-		self::testIsArrayIntStringBoolNullable([1 => 'A', 2 => true, 3 => 'C']);
-		self::testIsArrayIntStringBoolNullable(null);
-
-		// array{foo: string, bar: int}
-		self::testIsArrayShape(['foo' => 'A', 'bar' => 1]);
 	}
 
 
-	private static function testIsListInt(mixed $intList): void
+	private static function testNullableTypes(): void
 	{
-		assert(TypeValidator::isType($intList, 'list<int>'));
-		self::checkIsListIntType($intList);
+		assert(TypeValidator::isType('A', 'string|null'));
+		assert(TypeValidator::isType(null, 'string|null'));
+		assert(!TypeValidator::isType(1, 'string|null'));
+		assert(TypeValidator::isType('B', '?string'));
+		assert(TypeValidator::isType(null, '?string'));
+		assert(!TypeValidator::isType(2, '?string'));
 	}
 
 
-	/**
-	 * @param list<int> $intList
-	 */
-	private static function checkIsListIntType(array $intList): void
+	private static function testConstTypes(): void
 	{
-		Helper::dump($intList);
+		assert(TypeValidator::isType('A', "'A'"));
+		assert(!TypeValidator::isType('B', "'A'"));
+		assert(TypeValidator::isType(1, '1'));
+		assert(!TypeValidator::isType(2, '1'));
+		assert(TypeValidator::isType(1.1, '1.1'));
+		assert(!TypeValidator::isType(1.2, '1.1'));
 	}
 
 
-	private static function testIsListBool(mixed $boolList): void
+	private static function testArrayType(): void
 	{
-		assert(TypeValidator::isType($boolList, 'list<bool>'));
-		self::checkIsListBoolType($boolList);
+		// []
+		assert(TypeValidator::isType([1], 'int[]'));
+		assert(!TypeValidator::isType(['1'], 'int[]'));
+		assert(!TypeValidator::isType(1, 'int[]'));
+
+		// Shape
+		assert(TypeValidator::isType(['foo' => 1, 'bar' => 'test'], 'array{\'foo\': int, "bar": string}'));
+		assert(TypeValidator::isType(['foo' => 1, 'bar' => 'test'], 'array{\'foo\': int, "bar"?: string}'));
+		assert(TypeValidator::isType(['foo' => 1, 'bar' => 'test'], 'array{\'foo\': int, bar?: string}'));
+		assert(TypeValidator::isType(['foo' => 1], 'array{\'foo\': int, "bar"?: string}'));
+		assert(TypeValidator::isType(['foo' => 1, 'bar' => 'test'], 'array{foo: int, bar: string}'));
+		assert(TypeValidator::isType([1, 3], 'array{int, int}'));
+		assert(TypeValidator::isType([1, 3], 'array{0: int, 1: int}'));
+		assert(!TypeValidator::isType(1, 'array{foo: int, bar: string}'));
+		assert(!TypeValidator::isType(['foo' => 1], 'array{foo: int, bar: string}'));
+		assert(!TypeValidator::isType(['foo' => '1'], 'array{foo: int}'));
+
+		// Generic
+		assert(TypeValidator::isType([1, 2], 'array<int>'));
+		assert(TypeValidator::isType([1, 2], 'array<int, int>'));
+		assert(!TypeValidator::isType([1, 2], 'array<string, int>'));
+		assert(!TypeValidator::isType([1, 2], 'array<int, string>'));
+		assert(!TypeValidator::isType([], 'non-empty-array<int>'));
+		assert(!TypeValidator::isType(1, 'array<int>'));
+		assert(TypeValidator::isType([1, 2], 'list<int>'));
+		assert(TypeValidator::isType(['1', 2], 'list<int|string>'));
+		assert(!TypeValidator::isType([1], 'list<string>'));
+		assert(!TypeValidator::isType([1 => 1], 'list<int>'));
+		assert(!TypeValidator::isType(1, 'list<int>'));
+		assert(!TypeValidator::isType([], 'non-empty-list<int>'));
 	}
 
 
-	/**
-	 * @param list<bool> $boolList
-	 */
-	private static function checkIsListBoolType(array $boolList): void
+	private static function testObjectType(): void
 	{
-		Helper::dump($boolList);
+		// Shape
+		assert(TypeValidator::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{\'foo\': int, "bar": string}'));
+		assert(TypeValidator::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{\'foo\': int, "bar"?: string}'));
+		assert(TypeValidator::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{\'foo\': int, bar?: string}'));
+		assert(TypeValidator::isType((object) ['foo' => 1], 'object{\'foo\': int, "bar"?: string}'));
+		assert(TypeValidator::isType((object) ['foo' => 1, 'bar' => 'test'], 'object{foo: int, bar: string}'));
+		assert(!TypeValidator::isType(1, 'object{foo: int, bar: string}'));
+		assert(!TypeValidator::isType((object) ['foo' => 1], 'object{foo: int, bar: string}'));
+		assert(!TypeValidator::isType((object) ['foo' => '1'], 'object{foo: int}'));
+
+		// Intersection
+		assert(TypeValidator::isType(TestEnum::A, '\BackedEnum&\UnitEnum'));
+		assert(!TypeValidator::isType(TestEnum::A, '\BackedEnum&\DateTime'));
 	}
 
 
-	private static function testIsListObject(mixed $objectList): void
+	private static function testIntType(): void
 	{
-		assert(TypeValidator::isType($objectList, 'list<\DateTimeImmutable>'));
-		self::checkIsListObjectType($objectList);
+		// Generic
+		assert(TypeValidator::isType(1, 'int<0, 2>'));
+		assert(TypeValidator::isType(1, 'int<min, 2>'));
+		assert(TypeValidator::isType(1, 'int<0, max>'));
+		assert(!TypeValidator::isType(0, 'int<1, 2>'));
+
+		// Mask
+		assert(TypeValidator::isType(0, 'int-mask<1, 2>'));
+		assert(TypeValidator::isType(0, 'int-mask<0, 1, 2>'));
+		assert(TypeValidator::isType(1, 'int-mask<1, 2>'));
+		assert(TypeValidator::isType(3, 'int-mask<1|2>'));
+		assert(!TypeValidator::isType(4, 'int-mask<1|2>'));
 	}
 
 
-	/**
-	 * @param list<\DateTimeImmutable> $objectList
-	 */
-	private static function checkIsListObjectType(array $objectList): void
+	private static function testClassStringInterfaceStringType(): void
 	{
-		Helper::dump($objectList);
+		// Generic
+		assert(TypeValidator::isType(\DateTime::class, 'class-string<\DateTime>'));
+		assert(!TypeValidator::isType(\DateTimeImmutable::class, 'class-string<\DateTime>'));
+		assert(TypeValidator::isType(\DateTime::class, 'class-string<\DateTime|\DateTimeImmutable>'));
+		assert(TypeValidator::isType(\DateTimeImmutable::class, 'class-string<\DateTime|\DateTimeImmutable>'));
+		assert(!TypeValidator::isType(TestToString::class, 'class-string<\DateTime|\DateTimeImmutable>'));
+		assert(!TypeValidator::isType(1, 'class-string<\DateTime>'));
+		assert(TypeValidator::isType(TestStringableAndJsonSerialize::class, 'interface-string<\Stringable>'));
+		assert(TypeValidator::isType(TestStringableAndJsonSerialize::class, 'interface-string<\Stringable&\JsonSerializable>'));
+		assert(!TypeValidator::isType(self::class, 'interface-string<\JsonSerializable>'));
 	}
 
 
-	private static function testIsListFqnObject(mixed $objectList): void
+	private static function testComplexType(): void
 	{
-		assert(TypeValidator::isType($objectList, 'list<Helpers\FullyQualifiedClassNameResolver>'));
-		self::checkIsListFqnObjectType($objectList);
-	}
-
-
-	/**
-	 * @param list<Helpers\FullyQualifiedClassNameResolver> $objectList
-	 */
-	private static function checkIsListFqnObjectType(array $objectList): void
-	{
-		Helper::dump($objectList);
-	}
-
-
-	private static function testIsListIntString(mixed $intStringList): void
-	{
-		assert(TypeValidator::isType($intStringList, 'list<int|string>'));
-		self::checkIsListIntStringType($intStringList);
-	}
-
-
-	/**
-	 * @param list<int|string> $intStringList
-	 */
-	private static function checkIsListIntStringType(array $intStringList): void
-	{
-		Helper::dump($intStringList);
-	}
-
-
-	private static function testIsListArray(mixed $arrayList): void
-	{
-		assert(TypeValidator::isType($arrayList, 'list<array<int, float>>'));
-		self::checkIsListArrayType($arrayList);
-	}
-
-
-	/**
-	 * @param list<array<int, float>> $arrayList
-	 */
-	private static function checkIsListArrayType(array $arrayList): void
-	{
-		Helper::dump($arrayList);
-	}
-
-
-	private static function testIsListStringOrListNull(mixed $arrayList): void
-	{
-		assert(TypeValidator::isType($arrayList, 'list<string>|list<null>'));
-		self::checkIsListStringOrListNull($arrayList);
-	}
-
-
-	/**
-	 * @param list<string>|list<null> $arrayList
-	 */
-	private static function checkIsListStringOrListNull(array $arrayList): void
-	{
-		Helper::dump($arrayList);
-	}
-
-
-	private static function testIsArrayIntStringBool(mixed $arrayIntStringBool): void
-	{
-		assert(TypeValidator::isType($arrayIntStringBool, 'array<int, string|bool>'));
-		self::checkIsArrayIntStringBoolType($arrayIntStringBool);
-	}
-
-
-	/**
-	 * @param array<int, string|bool> $arrayIntStringBool
-	 */
-	private static function checkIsArrayIntStringBoolType(array $arrayIntStringBool): void
-	{
-		Helper::dump($arrayIntStringBool);
-	}
-
-
-	private static function testIsArrayIntStringBoolNullable(mixed $arrayIntStringBoolNullable): void
-	{
-		assert(TypeValidator::isType($arrayIntStringBoolNullable, 'array<int, string|bool>|null'));
-		self::checkIsArrayIntStringBoolTypeNullable($arrayIntStringBoolNullable);
-	}
-
-
-	/**
-	 * @param array<int, string|bool>|null $arrayIntStringBoolNullable
-	 */
-	private static function checkIsArrayIntStringBoolTypeNullable(array|null $arrayIntStringBoolNullable): void
-	{
-		Helper::dump($arrayIntStringBoolNullable);
-	}
-
-
-	private static function testIsArrayShape(mixed $arrayShape): void
-	{
-		assert(TypeValidator::isType($arrayShape, 'array{foo: string, bar: int}'));
-		self::checkIsArrayShape($arrayShape);
-	}
-
-
-	/**
-	 * @param array{foo: string, bar: int} $arrayIntStringBoolNullable
-	 */
-	private static function checkIsArrayShape(array $arrayIntStringBoolNullable): void
-	{
-		Helper::dump($arrayIntStringBoolNullable);
+		assert(TypeValidator::isType([['foo' => 1, 'bar' => 'test']], 'list<array{foo: int, bar: string}>'));
 	}
 
 }
@@ -398,15 +334,22 @@ class RuntimeTest
 enum TestEnum: int
 {
 	case A = 1;
+
 }
 
 
-class TestStringable implements \Stringable
+class TestStringableAndJsonSerialize implements \Stringable, \JsonSerializable
 {
 
 	public function __toString(): string
 	{
 		return self::class;
+	}
+
+
+	public function jsonSerialize(): mixed
+	{
+		return [];
 	}
 
 }
@@ -422,6 +365,10 @@ class TestToString
 
 }
 
-Assert::noError(function (): void {
-	RuntimeTest::test();
-});
+
+trait TestTrait
+{
+
+}
+
+RuntimeTest::test();

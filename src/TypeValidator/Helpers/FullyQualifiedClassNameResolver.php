@@ -6,7 +6,7 @@ use PhpParser;
 
 class FullyQualifiedClassNameResolver
 {
-	/** @var array<string, PhpParser\NameContext|false> */
+	/** @var array<string, PhpParser\NameContext|null> */
 	private static array $nameContextsCache = [];
 
 
@@ -17,11 +17,11 @@ class FullyQualifiedClassNameResolver
 		}
 
 		if (!isset(self::$nameContextsCache[$filename])) {
-			self::$nameContextsCache[$filename] = self::createNameContext($filename) ?? false;
+			self::$nameContextsCache[$filename] = self::createNameContext($filename);
 		}
 
 		$nameContext = self::$nameContextsCache[$filename];
-		if ($nameContext === false) {
+		if ($nameContext === null) {
 			return $class;
 		}
 
@@ -29,12 +29,8 @@ class FullyQualifiedClassNameResolver
 	}
 
 
-	private static function createNameContext(string|null $filename): PhpParser\NameContext|null
+	private static function createNameContext(string $filename): PhpParser\NameContext|null
 	{
-		if ($filename === null) {
-			return null;
-		}
-
 		$parser = (new PhpParser\ParserFactory())->createForHostVersion();
 		$traverser = new PhpParser\NodeTraverser();
 		$nameResolver = new PhpParser\NodeVisitor\NameResolver();
@@ -42,7 +38,7 @@ class FullyQualifiedClassNameResolver
 		$nameContext = $nameResolver->getNameContext();
 
 		try {
-			$code = file_get_contents($filename);
+			$code = @file_get_contents($filename); // intentionally @ - file may not exist
 			if ($code === false) {
 				return null;
 			}
@@ -56,10 +52,8 @@ class FullyQualifiedClassNameResolver
 
 			return $nameContext;
 		} catch (\Throwable) {
-			// ignore errors
+			return null;
 		}
-
-		return null;
 	}
 
 }

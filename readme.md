@@ -8,22 +8,24 @@
 
 ## Introduction
 
-Validate types with PHP Doc description and narrow types for [PHPStan](https://phpstan.org/).
+Validates types using PHP Doc descriptions and narrows types for [PHPStan](https://phpstan.org/).
 
-The goal of this library is to get rid of `@var` annotations. You can check complex array/list types with `assert` PHP function in the same way as for the simple types (`assert(is_int($var));`).
-
-> Array/object shapes are not supported. Arrays must be defined with `<...>`, `[]` syntax is not supported.
-
-There is one global function `is_type(mixed $var, string $type)` or static method `Forrest79\NarrowTypes::isType(mixed $var, string $type)`. That really check data in `$var` against the type description and there is corresponding PHPStan extension so PHPStan will understand, that `$var` is in described type. 
-
-Example:
+Imagine you're loading data from some external source. For PHP, this is mostly `mixed` (or some other common type like `array`/`object`), and PHPStan is unhappy with this. If data is some simple type, most of us will add something like:
 
 ```php
-$arr = [3.14, 5, 10];
-assert(is_type($arr, 'list<float|int>'));
+assert(is_int($data)); // if we know, there will be always an int
+if (!is_int($data)) throw new InvalidDataException(); // if we want to check this also in runtime
 ```
 
-In common the `assert` function is disabled on production, so check is performed only on devel/test environments and there is no need to distribute this library on the production environment. 
+Both make PHPStan happy, and you code is also tested (the first example mostly in dev environment, where the assertion is on).
+
+But when the loaded data is a complex type like `list<array{type: int, dates?: array<string, \DateTime>, validator: class-string<IValidator>}>`.
+
+Checking this at runtime and making PHPStan happy is now harder. The goal of this library is to make this as simple as `assert(is_int($data))`.
+
+Use `assert(is_type($data, 'list<array{type: int, dates?: array<string, \DateTime>, validator: class-string<IValidator>}>'))` and the variable is really checked for the correct type at runtime, and the type is also narrowed for PHPStan.
+
+> Code coverage is computed without PHPStan extension - only the PHP runtime part.
 
 ## Installation
 
@@ -33,26 +35,28 @@ To use this extension, require it in [Composer](https://getcomposer.org/):
 composer require --dev forrest79/type-validator
 ```
 
-> You probably want this extension only for dev but it can be used also in production (omit `--dev`).
+> You probably only want this extension for development, but it can also be used in production (omit `--dev`).
 
 ## Using
 
-All simple types with correspondent `is_...` function are supported `null`, `int`, `float`, `string`, `bool`, `callable` and `object`. Arrays `array` and lists `list` can be defined with specified types with classic `<...>` syntax (known from PHPStan).
+There is one global function `is_type(mixed $var, string $type)` and static methods `Forrest79\TypeValidator::isType(mixed $var, string $type): bool` or `Forrest79\TypeValidator::checkType(mixed $var, string $type): void`.
 
-You can also use `|` operator like `int|string`.
+All of them really check the data in `$var` against the type description and there is corresponding PHPStan extension so PHPStan will understand, that `$var` is in described type. 
 
-> All strings that are not matched as an internal simple types are resolved as object name. Object name can be defined with whole namespace (when starting with `\`) or is completed from actual class namespace/use in a classic way (thanks to `nikic/php-parser`). 
+The function `is_type(mixed $var, string $type)` and method `Forrest79\TypeValidator::isType(mixed $var, string $type)` return a `bool` - true if `$var` matches the `$type`, and `false` otherwise.
 
-Simple example:
+The Method `Forrest79\TypeValidator::checkType(mixed $var, string $type)` has no return, but it throws a `CheckException`, if `$var` does not match the `$type`.
+
+Example:
 
 ```php
-assert(is_type($var, 'int'));
-assert(is_type($var, 'int|string'));
+$arr = [3.14, 5, 10];
+assert(is_type($arr, 'list<float|int>'));
+assert(Forrest79\TypeValidator::isType($arr, 'list<float|int>'));
+Forrest79\TypeValidator::checkType($arr, 'list<float|int>'));
 ```
 
-> For simple types is recommended to use internal PHP functions `is_...`.
-
-The main goal is to replace something like this:
+With this you can replace your `@var` annotations:
 
 ```php
 /** @var array<string|int, list<Db\Row>> $arr
@@ -66,18 +70,48 @@ $arr = json_decode($data);
 assert(is_type($arr, 'array<string|int, list<Db\Row>>'));
 ```
 
-With the benefit variable `$arr` is checked for defined type.
+The benefit is that variable `$arr` is checked for defined type.
+
+Almost all PHPDoc types from PHPStan are supported (more information about supported types is provided later in the docs).
 
 To use this library as PHPStan extension include `extension.neon` in your project's PHPStan config:
 
 ```yaml
 includes:
-    - vendor/forrest79/phpstan-narrow-types/extension.neon
+    - vendor/forrest79/type-validator/extension.neon
 ```
 
-### FQN
+> Because of PHPStan, the type description must be a static string—nothing can be generated dynamically.
 
-To don't have unused `use` statement you can concat type string with `::class`.
+### Use in production
+
+Typically, the `assert` function is disabled in production, so checks are only performed in development/test environments, and there is no need to distribute this library in a production environment.
+
+But you can use this for validation also in your production code. Parsing PHPDoc types is not too performance-intensive. This library depends on `phpstan/phpdoc-parser` for parsing types and `nikic/php-parser` for detection fully qualified class names.   
+
+
+### FQN (Fully qualified names)
+
+Correct fully qualified names are computed from the current namespace and `use` statements, just like every other item in your PHP source files. However, if you use a `use` statement only for this library, your IDE and PHPCS may mark it as unused because they don't know about this library:
+
+Example:
+
+```php
+namespace App;
+
+use App\Presenter; // this use is marked as unused
+
+assert($presenter, 'class-string<Presenter>'); // even though it is correctly used here
+```
+
+One solution is to concatenate the type string with `::class` such as `assert($presenter, 'class-string<\\' . Presenter::class . '>')`. However, this looks very ugly. I prefer to use an FQN in the type description and omit the `use` statement:
+
+```php
+namespace App;
+
+assert($presenter, 'class-string<\App\Presenter>');
+```
+
 
 ### Supported PHPStan - PHPDoc Types
 
@@ -90,24 +124,26 @@ According to https://github.com/phpstan/phpstan/blob/2.1.x/website/src/writing-p
 #### Basic types ✅/🚫/❌
 
 - `int`, `integer` ✅
-- `string` ✅
+- `string`, `non-empty-string`, `non-empty-lowercase-string`, `non-empty-uppercase-string`, `truthy-string`, `non-falsy-string`, `lowercase-string`, `uppercase-string` ✅
+- `literal-string`, `non-empty-literal-string` ❌
+- `numeric-string` ✅
+- `__stringandstringable` (`string` or object implementing `Stringable` interface or object with `__toString()` method) ✅
 - `array-key` ✅
-- `bool`, `boolean` ✅
-- `true` ✅
-- `false` ✅
+- `bool`, `boolean`, `true`, `false` ✅
 - `null` ✅
-- `float` ✅
-- `double` ✅
-- `number` ✅
-- `scalar` ✅
-- `array` ✅
+- `float`, `double` ✅
+- `number`, `numeric` ✅
+- `scalar`, `empty-scalar`, `non-empty-scalar` ✅
+- `array`, `associative-array`, `non-empty-array` ✅
+- `list`, `non-empty-list` ✅
 - `iterable` ✅
-- `callable` ✅, `pure-callable` ❌
-- `resource` ✅, `closed-resource` ✅, `open-resource` ✅
-- `void` 🚫
+- `callable`, `callable-string`, `callable-array`, `callable-object` ✅, `pure-callable` ❌
+- `resource`, `open-resource`, `closed-resource` ✅
 - `object` ✅
-
-#### Mixed ✅
+- `empty` ✅
+- `mixed`, `non-empty-mixed` ✅
+- `class-string`, `interface-string`, `trait-string`, `enum-string` ✅
+- `void` 🚫
 
 #### Classes and interfaces ✅
 
@@ -160,9 +196,9 @@ According to https://github.com/phpstan/phpstan/blob/2.1.x/website/src/writing-p
 
 - `(Type1&Type2)|Type3` ✅
 
-#### static and $this 🚫
+#### self, static, parent and $this 🚫
 
-- `static` or `$this` 🚫
+- `self`, `static`, `parent` or `$this` 🚫
 
 #### Generics ✅/🚫/❌ (some yes, some no, some doesn't make sense - concrete info can be found in the other types description) 
 
@@ -173,20 +209,10 @@ According to https://github.com/phpstan/phpstan/blob/2.1.x/website/src/writing-p
 - `template-type` ❌
 - `new` ❌
 
-#### class-string ✅
+#### class-string, interface-string ✅
 
 - `class-string<Foo>` ✅
-
-
-#### Other advanced string types ✅/❌
-
-- `callable-string` ✅
-- `numeric-string` ✅
-- `non-empty-string` ✅
-- `non-falsy-string` ✅
-- `literal-string` ❌
-- `lowercase-string` ✅
-- `uppercase-string` ✅
+- `interface-string<Interface>` ✅
 
 #### Global type aliases ❌
 

@@ -13,13 +13,13 @@
 	"require": {
 		"php": "^8.3",
 		"phpstan/phpdoc-parser": "^2.3",
-		"phpstan/phpstan": "^2.1",
 		"nikic/php-parser": "^5.6"
  	},
 	"require-dev": {
 		"forrest79/phpcs": "^2.3",
 		"forrest79/phpcs-ignores": "^0.6",
 		"nette/tester": "^2.5",
+		"phpstan/phpstan": "^2.1",
 		"phpstan/phpstan-strict-rules": "^2.0",
 		"shipmonk/phpstan-rules": "^4.2"
 	},
@@ -36,7 +36,6 @@
 	},
 	"scripts": {
 		"tests": "tests/run-tests tests",
-		"tests-debug": "TYPEVALIDATOR_TESTS_DEBUG=1 tests/run-tests tests",
 		"coverage": "tests/collect-coverage tests",
 		"phpcs": "vendor/bin/phpcs --bootstrap=vendor/forrest79/phpcs-ignores/src/bootstrap-outdated.php -q -s src tests",
 		"phpstan": "vendor/bin/phpstan clear-result-cache && vendor/bin/phpstan analyse src tests -v"

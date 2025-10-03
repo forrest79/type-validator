@@ -32,6 +32,6 @@ class PHPStanTypeNodeResolverTest
 
 }
 
-Assert::noError(function (): void {
+Assert::noError(static function (): void {
 	PHPStanTypeNodeResolverTest::test();
 });
