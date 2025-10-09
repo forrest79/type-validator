@@ -1,9 +1,9 @@
 # TypeValidator
 
-[![Latest Stable Version](https://poser.pugx.org/forrest79/phpstan-narrow-types/v)](//packagist.org/packages/forrest79/phpstan-narrow-types)
-[![Monthly Downloads](https://poser.pugx.org/forrest79/phpstan-narrow-types/d/monthly)](//packagist.org/packages/forrest79/phpstan-narrow-types)
-[![License](https://poser.pugx.org/forrest79/phpstan-narrow-types/license)](//packagist.org/packages/forrest79/phpstan-narrow-types)
-[![Build](https://github.com/forrest79/phpstan-narrow-types/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/forrest79/phpstan-narrow-types/actions/workflows/build.yml)
+[![Latest Stable Version](https://poser.pugx.org/forrest79/type-validator/v)](//packagist.org/packages/forrest79/type-validator)
+[![Monthly Downloads](https://poser.pugx.org/forrest79/type-validator/d/monthly)](//packagist.org/packages/forrest79/type-validator)
+[![License](https://poser.pugx.org/forrest79/type-validator/license)](//packagist.org/packages/forrest79/type-validator)
+[![Build](https://github.com/forrest79/type-validator/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/forrest79/type-validator/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/forrest79/type-validator/graph/badge.svg?token=SYJCJXCZ6I)](https://codecov.io/gh/forrest79/type-validator)
 
 ## Introduction
