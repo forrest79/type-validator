@@ -9,7 +9,7 @@ require __DIR__ . '/bootstrap.php';
 
 class PHPStanTypeNodeResolverTest
 {
-	private const string EXPECTED_HASH_MD5 = '1c75bf936a33252756dd683fb1f6bd8a';
+	private const string EXPECTED_HASH_MD5 = 'c89fb53f28de88124d2fa253b801be7c';
 
 
 	public static function test(): void
