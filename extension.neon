@@ -8,3 +8,8 @@ services:
 		class: Forrest79\TypeValidator\PHPStan\Type\StaticMethodTypeSpecifyingExtension
 		tags:
 			- phpstan.typeSpecifier.staticMethodTypeSpecifyingExtension
+
+	Forrest79TypeValidatorDynamicFunctionReturnTypeExtension:
+		class: Forrest79\TypeValidator\PHPStan\Type\DynamicFunctionReturnTypeExtension
+		tags:
+			- phpstan.broker.dynamicFunctionReturnTypeExtension

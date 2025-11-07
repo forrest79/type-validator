@@ -15,6 +15,7 @@ class PHPStanExtensionTest
 		self::testIsType(1);
 		self::testCheck(2);
 		self::testIsTypeGlobalFunction(3);
+		self::testAssertType(4);
 	}
 
 
@@ -36,6 +37,12 @@ class PHPStanExtensionTest
 	{
 		assert(is_type($x, 'int'));
 		self::checkTypeDescription($x);
+	}
+
+
+	private static function testAssertType(mixed $x): void
+	{
+		self::checkTypeDescription(assert_type($x, 'int'));
 	}
 
 
