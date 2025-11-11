@@ -45,10 +45,20 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 	 */
 	protected function narrowTypes(array $args, Analyser\Scope $scope): Analyser\SpecifiedTypes
 	{
+		return $this->typeSpecifier->create(
+			$args[0]->value,
+			$this->prepareType($args[1]->value, $scope),
+			Analyser\TypeSpecifierContext::createTruthy(),
+			$scope,
+		);
+	}
+
+
+	protected function prepareType(Node\Expr $typeDescriptionArg, Analyser\Scope $scope): Type\Type
+	{
 		$filename = $scope->getFile();
 
-		$typeDescriptionArg = $args[1]->value;
-		$typeDescriptionType = $scope->getType($args[1]->value);
+		$typeDescriptionType = $scope->getType($typeDescriptionArg);
 		$typeDescriptionConstantStrings = $typeDescriptionType->getConstantStrings();
 
 		try {
@@ -61,12 +71,7 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 					self::$cache[$filename][$typeDescription] = (new PHPStan\Helpers\TypeConverter($this->typeNodeResolver, $filename, $typeDescription))->convertToType();
 				}
 
-				return $this->typeSpecifier->create(
-					$args[0]->value,
-					self::$cache[$filename][$typeDescription],
-					Analyser\TypeSpecifierContext::createTruthy(),
-					$scope,
-				);
+				return self::$cache[$filename][$typeDescription];
 			} else {
 				self::error($filename, sprintf('Bad type description \'%s\' (only constant string type descriptions are allowed)', $typeDescriptionType->describe(Type\VerbosityLevel::precise())), $typeDescriptionArg);
 			}
