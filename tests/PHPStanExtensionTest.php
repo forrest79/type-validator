@@ -42,7 +42,7 @@ class PHPStanExtensionTest
 
 	private static function testAssertType(mixed $x): void
 	{
-		self::checkTypeDescription(assert_type($x, 'int'));
+		self::checkTypeDescription(as_type($x, 'int'));
 	}
 
 

@@ -35,7 +35,7 @@ final class DynamicFunctionReturnTypeExtension extends ReturnTypeExtension imple
 	 */
 	protected static function getSupportedMethodsList(): array
 	{
-		return ['assert_type'];
+		return ['as_type'];
 	}
 
 }
