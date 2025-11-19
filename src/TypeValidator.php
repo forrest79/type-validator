@@ -25,7 +25,7 @@ class TypeValidator
 	private static function getRuntime(string $type): TypeValidator\Helpers\Runtime
 	{
 		$filename = '';
-		foreach (debug_backtrace() as $item) {
+		foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $item) {
 			if (!str_starts_with($item['file'] ?? '', __DIR__)) {
 				$filename = $item['file'] ?? '';
 				break;
