@@ -21,7 +21,7 @@
 		"nette/tester": "^2.5",
 		"phpstan/phpstan": "^2.1",
 		"phpstan/phpstan-strict-rules": "^2.0",
-		"shipmonk/phpstan-rules": "^4.2"
+		"shipmonk/phpstan-rules": "^4.3"
 	},
 	"autoload": {
 		"psr-4": {
