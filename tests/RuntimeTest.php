@@ -255,6 +255,7 @@ class RuntimeTest
 		assert(TypeValidator::isType([1, 3], 'array{0: int, 1: int}'));
 		assert(!TypeValidator::isType(1, 'array{foo: int, bar: string}'));
 		assert(!TypeValidator::isType(['foo' => 1], 'array{foo: int, bar: string}'));
+		assert(TypeValidator::isType(['foo' => 1], 'array{foo: int, bar?: string}'));
 		assert(!TypeValidator::isType(['foo' => '1'], 'array{foo: int}'));
 
 		// Generic

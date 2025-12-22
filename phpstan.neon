@@ -973,6 +973,12 @@ parameters:
 			path: tests/RuntimeTest.php
 
 		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{foo: 1} and ''array{foo: int, bar…'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
 			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with array{key: 1, 0: 2} and ''associative-array'' will always evaluate to true.'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1
