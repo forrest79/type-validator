@@ -7,7 +7,7 @@ use PhpParser;
 class FullyQualifiedClassNameResolver
 {
 	/** @var array<string, PhpParser\NameContext|null> */
-	private static array $nameContextsCache = [];
+	private static array $cache = [];
 
 
 	public static function resolve(string $filename, string $class): string
@@ -16,11 +16,11 @@ class FullyQualifiedClassNameResolver
 			return $class;
 		}
 
-		if (!isset(self::$nameContextsCache[$filename])) {
-			self::$nameContextsCache[$filename] = self::createNameContext($filename);
+		if (!isset(self::$cache[$filename])) {
+			self::$cache[$filename] = self::createNameContext($filename);
 		}
 
-		$nameContext = self::$nameContextsCache[$filename];
+		$nameContext = self::$cache[$filename];
 		if ($nameContext === null) {
 			return $class;
 		}

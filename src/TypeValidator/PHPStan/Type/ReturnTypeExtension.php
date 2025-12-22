@@ -14,9 +14,6 @@ use PhpParser\Node;
 
 abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtension
 {
-	/** @var array<string, array<string, Type\Type>> */
-	private static array $cache = [];
-
 	private PhpDoc\TypeNodeResolver $typeNodeResolver;
 
 	private Analyser\TypeSpecifier $typeSpecifier;
@@ -65,13 +62,9 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 			if (count($typeDescriptionConstantStrings) === 1) {
 				$typeDescription = $typeDescriptionConstantStrings[0]->getValue();
 
-				Helpers\SupportedTypes::check($filename, $typeDescription);
+				Helpers\SupportedTypes::check($typeDescription, static fn (): string => $filename);
 
-				if (!isset(self::$cache[$filename][$typeDescription])) {
-					self::$cache[$filename][$typeDescription] = (new PHPStan\Helpers\TypeConverter($this->typeNodeResolver, $filename, $typeDescription))->convertToType();
-				}
-
-				return self::$cache[$filename][$typeDescription];
+				return $this->typeNodeResolver->resolve(Helpers\PhpDocParser::parseType($typeDescription), PHPStan\Helpers\NameScopeFactory::create($filename));
 			} else {
 				self::error($filename, sprintf('Bad type description \'%s\' (only constant string type descriptions are allowed)', $typeDescriptionType->describe(Type\VerbosityLevel::precise())), $typeDescriptionArg);
 			}

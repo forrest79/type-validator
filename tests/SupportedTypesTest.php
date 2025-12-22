@@ -77,7 +77,7 @@ class SupportedTypesTest
 
 	private static function supportedTypes(string $typeDescription): void
 	{
-		(new Helpers\SupportedTypes(__FILE__, $typeDescription))->checkTypeDescription();
+		Helpers\SupportedTypes::check($typeDescription, static fn (): string => __FILE__);
 	}
 
 }

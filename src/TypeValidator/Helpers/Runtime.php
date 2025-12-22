@@ -7,27 +7,21 @@ use PHPStan\PhpDocParser\Ast;
 
 class Runtime
 {
-	private string $filename;
 
-	private string $typeDescription;
-
-
-	public function __construct(string $filename, string $typeDescription)
+	/**
+	 * @param callable(): string $filenameCallback
+	 */
+	public static function check(string $typeDescription, callable $filenameCallback, mixed $value): bool
 	{
-		SupportedTypes::check($filename, $typeDescription);
-
-		$this->filename = $filename;
-		$this->typeDescription = $typeDescription;
+		SupportedTypes::check($typeDescription, $filenameCallback);
+		return self::checkTypeNode(PhpDocParser::parseType($typeDescription), $filenameCallback, $value);
 	}
 
 
-	public function check(mixed $value): bool
-	{
-		return $this->checkTypeNode(PhpDocParser::parseType($this->typeDescription), $value);
-	}
-
-
-	private function checkTypeNode(Ast\Type\TypeNode $typeNode, mixed $value): bool
+	/**
+	 * @param callable(): string $filenameCallback
+	 */
+	private static function checkTypeNode(Ast\Type\TypeNode $typeNode, callable $filenameCallback, mixed $value): bool
 	{
 		// PHPStan source - src/PhpDoc/TypeNodeResolver.php + https://phpstan.org/writing-php-code/phpdoc-types
 		if ($typeNode instanceof Ast\Type\IdentifierTypeNode) {
@@ -83,7 +77,7 @@ class Runtime
 				'interface-string' => is_string($value) && interface_exists($value),
 				'trait-string' => is_string($value) && trait_exists($value),
 				'enum-string' => is_string($value) && enum_exists($value),
-				default => $this->instanceOf($typeNode->name, $value),
+				default => self::instanceOf($typeNode->name, $filenameCallback, $value),
 			};
 
 			if (!$result) {
@@ -116,7 +110,7 @@ class Runtime
 				return true;
 			}
 
-			return $this->checkTypeNode($typeNode->type, $value);
+			return self::checkTypeNode($typeNode->type, $filenameCallback, $value);
 		} else if ($typeNode instanceof Ast\Type\ConstTypeNode) {
 			$constExpr = $typeNode->constExpr;
 			if ($constExpr instanceof Ast\ConstExpr\ConstExprIntegerNode) {
@@ -132,7 +126,7 @@ class Runtime
 			}
 
 			foreach ($value as $item) {
-				if (!$this->checkTypeNode($typeNode->type, $item)) {
+				if (!self::checkTypeNode($typeNode->type, $filenameCallback, $item)) {
 					return false;
 				}
 			}
@@ -158,7 +152,7 @@ class Runtime
 
 				if (!$arrayShapeItem->optional && !array_key_exists($key, $value)) {
 					return false;
-				} else if (array_key_exists($key, $value) && !$this->checkTypeNode($arrayShapeItem->valueType, $value[$key])) {
+				} else if (array_key_exists($key, $value) && !self::checkTypeNode($arrayShapeItem->valueType, $filenameCallback, $value[$key])) {
 					return false;
 				}
 			}
@@ -179,7 +173,7 @@ class Runtime
 
 				if (!$objectShapeItem->optional && !property_exists($value, $key)) {
 					return false;
-				} else if (property_exists($value, $key) && !$this->checkTypeNode($objectShapeItem->valueType, $value->{$key})) {
+				} else if (property_exists($value, $key) && !self::checkTypeNode($objectShapeItem->valueType, $filenameCallback, $value->{$key})) {
 					return false;
 				}
 			}
@@ -200,7 +194,7 @@ class Runtime
 				foreach ($value as $key => $item) {
 					$checkItems = count($typeNode->genericTypes) === 1 ? [$item] : [$key, $item];
 					foreach ($typeNode->genericTypes as $i => $genericType) {
-						if (!$this->checkTypeNode($genericType, $checkItems[$i])) {
+						if (!self::checkTypeNode($genericType, $filenameCallback, $checkItems[$i])) {
 							return false;
 						}
 					}
@@ -215,7 +209,7 @@ class Runtime
 				}
 
 				foreach ($value as $item) {
-					if (!$this->checkTypeNode($typeNode->genericTypes[0], $item)) {
+					if (!self::checkTypeNode($typeNode->genericTypes[0], $filenameCallback, $item)) {
 						return false;
 					}
 				}
@@ -270,13 +264,13 @@ class Runtime
 					return false;
 				}
 
-				return $this->isClassStringOrInterfaceStringOf($typeNode->genericTypes[0], $value, $name === 'interface-string');
+				return self::isClassStringOrInterfaceStringOf($typeNode->genericTypes[0], $filenameCallback, $value, $name === 'interface-string');
 			}
 
 			return true;
 		} else if ($typeNode instanceof Ast\Type\UnionTypeNode) {
 			foreach ($typeNode->types as $typeNodeItem) {
-				if ($this->checkTypeNode($typeNodeItem, $value)) {
+				if (self::checkTypeNode($typeNodeItem, $filenameCallback, $value)) {
 					return true;
 				}
 			}
@@ -284,7 +278,7 @@ class Runtime
 			return false;
 		} else if ($typeNode instanceof Ast\Type\IntersectionTypeNode) {
 			foreach ($typeNode->types as $typeNodeItem) {
-				if (!$this->checkTypeNode($typeNodeItem, $value)) {
+				if (!self::checkTypeNode($typeNodeItem, $filenameCallback, $value)) {
 					return false;
 				}
 			}
@@ -296,22 +290,33 @@ class Runtime
 	}
 
 
-	private function instanceOf(string $class, mixed $value): bool
+	/**
+	 * @param callable(): string $filenameCallback
+	 */
+	private static function instanceOf(string $class, callable $filenameCallback, mixed $value): bool
 	{
-		$fullyQualifiedClassName = FullyQualifiedClassNameResolver::resolve($this->filename, $class);
+		$fullyQualifiedClassName = FullyQualifiedClassNameResolver::resolve($filenameCallback(), $class);
 		return $value instanceof $fullyQualifiedClassName;
 	}
 
 
-	private function isClassStringOrInterfaceStringOf(Ast\Type\TypeNode $typeNode, string $value, bool $interface): bool
+	/**
+	 * @param callable(): string $filenameCallback
+	 */
+	private static function isClassStringOrInterfaceStringOf(
+		Ast\Type\TypeNode $typeNode,
+		callable $filenameCallback,
+		string $value,
+		bool $interface,
+	): bool
 	{
 		if ($typeNode instanceof Ast\Type\IdentifierTypeNode) {
 			return $interface
-				? is_subclass_of($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name))
-				: is_a($value, FullyQualifiedClassNameResolver::resolve($this->filename, $typeNode->name), true);
+				? is_subclass_of($value, FullyQualifiedClassNameResolver::resolve($filenameCallback(), $typeNode->name))
+				: is_a($value, FullyQualifiedClassNameResolver::resolve($filenameCallback(), $typeNode->name), true);
 		} else if ($typeNode instanceof Ast\Type\UnionTypeNode) {
 			foreach ($typeNode->types as $type) {
-				if ($this->isClassStringOrInterfaceStringOf($type, $value, $interface)) {
+				if (self::isClassStringOrInterfaceStringOf($type, $filenameCallback, $value, $interface)) {
 					return true;
 				}
 			}
@@ -319,7 +324,7 @@ class Runtime
 			return false;
 		} else if ($typeNode instanceof Ast\Type\IntersectionTypeNode) {
 			foreach ($typeNode->types as $type) {
-				if (!$this->isClassStringOrInterfaceStringOf($type, $value, $interface)) {
+				if (!self::isClassStringOrInterfaceStringOf($type, $filenameCallback, $value, $interface)) {
 					return false;
 				}
 			}

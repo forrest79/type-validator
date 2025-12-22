@@ -4,39 +4,33 @@ namespace Forrest79;
 
 class TypeValidator
 {
-	/** @var array<string, array<string, TypeValidator\Helpers\Runtime>> */
-	private static array $cache = [];
+	private static \Closure|null $filenameCallback = null;
 
 
 	public static function isType(mixed $value, string $type): bool
 	{
-		return self::getRuntime($type)->check($value);
+		return TypeValidator\Helpers\Runtime::check($type, self::getFilenameCallback(), $value);
 	}
 
 
 	public static function checkType(mixed $value, string $type): void
 	{
-		if (!self::getRuntime($type)->check($value)) {
+		if (!TypeValidator\Helpers\Runtime::check($type, self::getFilenameCallback(), $value)) {
 			throw new TypeValidator\Exceptions\CheckException($type, $value);
 		}
 	}
 
 
-	private static function getRuntime(string $type): TypeValidator\Helpers\Runtime
+	/**
+	 * @return callable(): string
+	 */
+	private static function getFilenameCallback(): callable
 	{
-		$filename = '';
-		foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $item) {
-			if (!str_starts_with($item['file'] ?? '', __DIR__)) {
-				$filename = $item['file'] ?? '';
-				break;
-			}
+		if (self::$filenameCallback === null) {
+			self::$filenameCallback = static fn (): string => TypeValidator\Helpers\RuntimeSourceFilename::detect();
 		}
 
-		if (!isset(self::$cache[$filename][$type])) {
-			self::$cache[$filename][$type] = new TypeValidator\Helpers\Runtime($filename, $type);
-		}
-
-		return self::$cache[$filename][$type];
+		return self::$filenameCallback;
 	}
 
 }
