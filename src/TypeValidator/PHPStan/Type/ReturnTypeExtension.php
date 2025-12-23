@@ -44,17 +44,21 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 	{
 		return $this->typeSpecifier->create(
 			$args[0]->value,
-			$this->prepareType($args[1]->value, $scope),
+			$this->prepareType($args, $scope),
 			Analyser\TypeSpecifierContext::createTruthy(),
 			$scope,
 		);
 	}
 
 
-	protected function prepareType(Node\Expr $typeDescriptionArg, Analyser\Scope $scope): Type\Type
+	/**
+	 * @param array<Node\Arg> $args [0] = checked variable, [1] = type description
+	 */
+	protected function prepareType(array $args, Analyser\Scope $scope): Type\Type
 	{
 		$filename = $scope->getFile();
 
+		$typeDescriptionArg = $args[1]->value;
 		$typeDescriptionType = $scope->getType($typeDescriptionArg);
 		$typeDescriptionConstantStrings = $typeDescriptionType->getConstantStrings();
 
@@ -64,7 +68,10 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 
 				Helpers\SupportedTypes::check($typeDescription, static fn (): string => $filename);
 
-				return $this->typeNodeResolver->resolve(Helpers\PhpDocParser::parseType($typeDescription), PHPStan\Helpers\NameScopeFactory::create($filename));
+				$originalType = $scope->getType($args[0]->value);
+				$newType = $this->typeNodeResolver->resolve(Helpers\PhpDocParser::parseType($typeDescription), PHPStan\Helpers\NameScopeFactory::create($filename));
+
+				return Type\TypeCombinator::intersect($originalType, $newType);
 			} else {
 				self::error($filename, sprintf('Bad type description \'%s\' (only constant string type descriptions are allowed)', $typeDescriptionType->describe(Type\VerbosityLevel::precise())), $typeDescriptionArg);
 			}
