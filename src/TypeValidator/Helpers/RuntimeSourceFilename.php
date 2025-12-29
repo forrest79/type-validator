@@ -6,27 +6,39 @@ use Forrest79\TypeValidator\Exceptions;
 
 class RuntimeSourceFilename
 {
+	/** @var (\Closure(): string)|null */
+	private static \Closure|null $detectCallback = null;
+
 	private static string|null $rootDir = null;
 
 
-	public static function detect(): string
+	/**
+	 * @return callable(): string
+	 */
+	public static function detectCallback(): callable
 	{
-		$filename = '';
-		foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $item) {
-			if (!str_starts_with($item['file'] ?? '', self::getRootDir())) {
-				$filename = $item['file'] ?? '';
-				break;
-			}
+		if (self::$detectCallback === null) {
+			self::$detectCallback = static function (): string {
+				$filename = '';
+				foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $item) {
+					if (!str_starts_with($item['file'] ?? '', self::getRootDir())) {
+						$filename = $item['file'] ?? '';
+						break;
+					}
+				}
+
+				return $filename;
+			};
 		}
 
-		return $filename;
+		return self::$detectCallback;
 	}
 
 
 	private static function getRootDir(): string
 	{
 		if (self::$rootDir === null) {
-			$dir = realpath(__DIR__ . '/..');
+			$dir = realpath(__DIR__ . '/../..');
 			if ($dir === false) {
 				throw new Exceptions\ShouldNotHappenException();
 			}

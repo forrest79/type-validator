@@ -787,6 +787,12 @@ parameters:
 			path: tests/RuntimeTest.php
 
 		-
+			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\PHPStanTest and ''PHPStanTest'' will always evaluate to true.'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
 			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with Forrest79\TypeValidator\Tests\TestEnum::A and ''\\BackedEnum&…'' will always evaluate to true.'
 			identifier: staticMethod.alreadyNarrowedType
 			count: 1

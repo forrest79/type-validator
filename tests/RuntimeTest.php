@@ -192,6 +192,11 @@ class RuntimeTest
 		assert(!TypeValidator::isType([], 'object'));
 		assert(TypeValidator::isType(new \stdClass(), '\stdClass'));
 		assert(TypeValidator::isType(new self(), 'RuntimeTest'));
+		assert(TypeValidator::isType(new PHPStanTest(), 'PHPStanTest'));
+
+		// object with is_type() global function
+		assert(is_type(new self(), 'RuntimeTest'));
+		assert(is_type(new PHPStanTest(), 'PHPStanTest'));
 
 		// mixed / non-empty-mixed
 		assert(TypeValidator::isType('a', 'mixed'));

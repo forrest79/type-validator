@@ -4,33 +4,18 @@ namespace Forrest79;
 
 class TypeValidator
 {
-	private static \Closure|null $filenameCallback = null;
-
 
 	public static function isType(mixed $value, string $type): bool
 	{
-		return TypeValidator\Helpers\Runtime::check($type, self::getFilenameCallback(), $value);
+		return TypeValidator\Helpers\Runtime::check($type, TypeValidator\Helpers\RuntimeSourceFilename::detectCallback(), $value);
 	}
 
 
 	public static function checkType(mixed $value, string $type): void
 	{
-		if (!TypeValidator\Helpers\Runtime::check($type, self::getFilenameCallback(), $value)) {
+		if (!TypeValidator\Helpers\Runtime::check($type, TypeValidator\Helpers\RuntimeSourceFilename::detectCallback(), $value)) {
 			throw new TypeValidator\Exceptions\CheckException($type, $value);
 		}
-	}
-
-
-	/**
-	 * @return callable(): string
-	 */
-	private static function getFilenameCallback(): callable
-	{
-		if (self::$filenameCallback === null) {
-			self::$filenameCallback = static fn (): string => TypeValidator\Helpers\RuntimeSourceFilename::detect();
-		}
-
-		return self::$filenameCallback;
 	}
 
 }
