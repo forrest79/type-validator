@@ -51,7 +51,11 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 	}
 
 
-	protected function prepareType(Node\Expr $typeDescriptionArg, Analyser\Scope $scope): Type\Type
+	protected function prepareType(
+		Node\Expr $typeDescriptionArg,
+		Analyser\Scope $scope,
+		string|null &$typeDescription = null,
+	): Type\Type
 	{
 		$filename = $scope->getFile();
 
@@ -80,7 +84,7 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 	}
 
 
-	private static function error(string $filename, string $message, Node\Expr $arg): never
+	final protected static function error(string $filename, string $message, Node\Expr $arg): never
 	{
 		throw new Parser\ParserErrorsException([new Error($message, ['startLine' => $arg->getLine()])], $filename);
 	}
