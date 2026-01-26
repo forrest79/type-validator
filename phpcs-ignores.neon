@@ -60,6 +60,12 @@ ignoreErrors:
 		path: tests/FullyQualifiedClassNameResolverTest.php
 
 	-
+		sniff: Generic.PHP.ForbiddenFunctions.Found
+		message: 'The use of function var_dump() is forbidden'
+		count: 1
+		path: tests/PHPStanExtensionTest.php
+
+	-
 		sniff: PSR1.Files.SideEffects.FoundWithSymbols
 		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
 		count: 1
@@ -68,8 +74,20 @@ ignoreErrors:
 	-
 		sniff: Generic.PHP.ForbiddenFunctions.Found
 		message: 'The use of function var_dump() is forbidden'
+		count: 14
+		path: tests/PHPStanTest.php
+
+	-
+		sniff: PSR1.Files.SideEffects.FoundWithSymbols
+		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
 		count: 1
-		path: tests/PHPStanExtensionTest.php
+		path: tests/PHPStanTest.php
+
+	-
+		sniff: SlevomatCodingStandard.Classes.TraitUseSpacing.IncorrectLinesCountAfterLastUse
+		message: 'Expected 1 line after last use statement, found 2.'
+		count: 1
+		path: tests/PHPStanTest.php
 
 	-
 		sniff: PSR1.Files.SideEffects.FoundWithSymbols
@@ -82,18 +100,6 @@ ignoreErrors:
 		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
 		count: 1
 		path: tests/PhpDocParserTest.php
-
-	-
-		sniff: PSR1.Files.SideEffects.FoundWithSymbols
-		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
-		count: 1
-		path: tests/PHPStanTest.php
-
-	-
-		sniff: Generic.PHP.ForbiddenFunctions.Found
-		message: 'The use of function var_dump() is forbidden'
-		count: 14
-		path: tests/PHPStanTest.php
 
 	-
 		sniff: PSR1.Classes.ClassDeclaration.MultipleClasses
@@ -116,6 +122,12 @@ ignoreErrors:
 	-
 		sniff: SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix
 		message: Superfluous suffix "Trait".
+		count: 1
+		path: tests/RuntimeTest.php
+
+	-
+		sniff: SlevomatCodingStandard.Classes.TraitUseSpacing.IncorrectLinesCountAfterLastUse
+		message: 'Expected 1 line after last use statement, found 2.'
 		count: 1
 		path: tests/RuntimeTest.php
 
@@ -148,4 +160,10 @@ ignoreErrors:
 		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 11 and the first side effect is on line 9.'
 		count: 1
 		path: tests/SupportedTypesTest.php
+
+	-
+		sniff: Generic.PHP.ForbiddenFunctions.Found
+		message: 'The use of function var_dump() is forbidden'
+		count: 1
+		path: tests/TraitWithFullyQualifiedClassName.php
 

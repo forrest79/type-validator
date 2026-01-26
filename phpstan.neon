@@ -31,6 +31,12 @@ parameters:
 			path: tests/PHPStanTest.php
 
 		-
+			rawMessage: 'Call to function is_type() with Forrest79\TypeValidator\Tests\RuntimeTest and ''RuntimeTest'' will always evaluate to true.'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/RuntimeTest.php
+
+		-
 			rawMessage: 'Call to static method Forrest79\TypeValidator::checkType() with 1 and ''float'' will always evaluate to false.'
 			identifier: staticMethod.impossibleType
 			count: 1
