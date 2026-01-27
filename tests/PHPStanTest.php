@@ -10,6 +10,8 @@ require __DIR__ . '/bootstrap.php';
 
 class PHPStanTest
 {
+	use TraitWithFullyQualifiedClassName;
+
 
 	public static function test(): void
 	{
@@ -63,6 +65,9 @@ class PHPStanTest
 		// close-resource
 		fclose($resource);
 		self::testIsCloseResource($resource);
+
+		// trait
+		self::testTraitIsListFqnObject([new TypeValidator\PHPStan\Helpers\PhpParserNamespaceResolver()]);
 	}
 
 

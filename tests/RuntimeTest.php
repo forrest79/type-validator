@@ -9,6 +9,8 @@ require __DIR__ . '/bootstrap.php';
 
 class RuntimeTest
 {
+	use TraitWithFullyQualifiedClassName;
+
 
 	public static function test(): void
 	{
@@ -21,6 +23,7 @@ class RuntimeTest
 		self::testIntType();
 		self::testClassStringInterfaceStringType();
 		self::testComplexType();
+		self::testIsTypeGlobalFunction();
 	}
 
 
@@ -192,9 +195,7 @@ class RuntimeTest
 		assert(!TypeValidator::isType([], 'object'));
 		assert(TypeValidator::isType(new \stdClass(), '\stdClass'));
 		assert(TypeValidator::isType(new self(), 'RuntimeTest'));
-
-		// object with is_type() global function
-		assert(is_type(new self(), 'RuntimeTest'));
+		self::testTraitIsListFqnObject([new TypeValidator\PHPStan\Helpers\PhpParserNamespaceResolver()]);
 
 		// mixed / non-empty-mixed
 		assert(TypeValidator::isType('a', 'mixed'));
@@ -330,6 +331,13 @@ class RuntimeTest
 	private static function testComplexType(): void
 	{
 		assert(TypeValidator::isType([['foo' => 1, 'bar' => 'test']], 'list<array{foo: int, bar: string}>'));
+	}
+
+
+	private static function testIsTypeGlobalFunction(): void
+	{
+		// object with is_type() global function
+		assert(is_type(new self(), 'RuntimeTest'));
 	}
 
 }

@@ -57,7 +57,8 @@ abstract class ReturnTypeExtension implements Analyser\TypeSpecifierAwareExtensi
 		string|null &$typeDescription = null,
 	): Type\Type
 	{
-		$filename = $scope->getFile();
+		$filename = $scope->isInTrait() ? $scope->getTraitReflection()->getFileName() : $scope->getFile();
+		assert(is_string($filename));
 
 		$typeDescriptionType = $scope->getType($typeDescriptionArg);
 		$typeDescriptionConstantStrings = $typeDescriptionType->getConstantStrings();
