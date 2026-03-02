@@ -93,7 +93,7 @@ ignoreErrors:
 		sniff: PSR1.Files.SideEffects.FoundWithSymbols
 		message: 'A file should declare new symbols (classes, functions, constants, etc.) and cause no other side effects, or it should execute logic with side effects, but should not do both. The first symbol is defined on line 10 and the first side effect is on line 8.'
 		count: 1
-		path: tests/PHPStanTypeNodeResolverTest.php
+		path: tests/PHPStanTypeNodeResolverSourceCodeChangesTest.php
 
 	-
 		sniff: PSR1.Files.SideEffects.FoundWithSymbols
