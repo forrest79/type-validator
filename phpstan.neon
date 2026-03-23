@@ -171,7 +171,7 @@ parameters:
 		-
 			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''DateTime'' and ''class-string<…'' will always evaluate to true.'
 			identifier: staticMethod.alreadyNarrowedType
-			count: 2
+			count: 1
 			path: tests/RuntimeTest.php
 
 		-
@@ -201,7 +201,7 @@ parameters:
 		-
 			rawMessage: 'Call to static method Forrest79\TypeValidator::isType() with ''Forrest79\\TypeValidator\\Tests\\TestStringableAndJsonSerialize'' and ''interface-string<…'' will always evaluate to true.'
 			identifier: staticMethod.alreadyNarrowedType
-			count: 2
+			count: 1
 			path: tests/RuntimeTest.php
 
 		-
