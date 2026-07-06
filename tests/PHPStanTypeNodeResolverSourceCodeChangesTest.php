@@ -9,7 +9,7 @@ require __DIR__ . '/bootstrap.php';
 
 class PHPStanTypeNodeResolverSourceCodeChangesTest
 {
-	private const string EXPECTED_HASH_MD5 = '1021d38676ce101e7f8cb1f30d1abc87';
+	private const string EXPECTED_HASH_MD5 = 'd9690717ce0e0af92565ac1128a48a55';
 
 	private const string PHP_SOURCE_FOR_DIFF = __DIR__ . '/assets/phpstan-src/PHPStan_PhpDoc_TypeNodeResolver.phps';
 
