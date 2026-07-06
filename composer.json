@@ -16,7 +16,7 @@
 		"nikic/php-parser": "^5.6"
  	},
 	"require-dev": {
-		"forrest79/phpcs": "^2.3",
+		"forrest79/phpcs": "^2.5",
 		"forrest79/phpcs-ignores": "^0.6",
 		"nette/tester": "^2.6",
 		"phpstan/phpstan": "^2.2",
