@@ -7,7 +7,7 @@ use Closure;
 use Generator;
 use Iterator;
 use IteratorAggregate;
-use _PHPStan_2874a496b\Nette\Utils\Strings;
+use _PHPStan_cb3b7e994\Nette\Utils\Strings;
 use PhpParser\Node\Name;
 use PHPStan\Analyser\ConstantResolver;
 use PHPStan\Analyser\NameScope;
@@ -41,6 +41,7 @@ use PHPStan\PhpDocParser\Ast\Type\OffsetAccessTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use PHPStan\Reflection\Assertions;
 use PHPStan\Reflection\Callables\SimpleImpurePoint;
 use PHPStan\Reflection\InitializerExprContext;
 use PHPStan\Reflection\InitializerExprTypeResolver;
@@ -61,6 +62,7 @@ use PHPStan\Type\Accessory\NonEmptyArrayType;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\BenevolentUnionType;
 use PHPStan\Type\BooleanType;
+use PHPStan\Type\CallableAssertionsHelper;
 use PHPStan\Type\CallableType;
 use PHPStan\Type\ClassConstantAccessType;
 use PHPStan\Type\ClassStringType;
@@ -90,6 +92,7 @@ use PHPStan\Type\IntegerType;
 use PHPStan\Type\IntersectionType;
 use PHPStan\Type\IterableType;
 use PHPStan\Type\KeyOfType;
+use PHPStan\Type\LateResolvableArrayShapeType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\NewObjectType;
 use PHPStan\Type\NonAcceptingNeverType;
@@ -181,7 +184,7 @@ final class TypeNodeResolver
         if ($typeNode instanceof IdentifierTypeNode) {
             return $this->resolveIdentifierTypeNode($typeNode, $nameScope);
         } elseif ($typeNode instanceof ThisTypeNode) {
-            return $this->resolveThisTypeNode($typeNode, $nameScope);
+            return $this->resolveThisTypeNode($nameScope);
         } elseif ($typeNode instanceof NullableTypeNode) {
             return $this->resolveNullableTypeNode($typeNode, $nameScope);
         } elseif ($typeNode instanceof UnionTypeNode) {
@@ -324,6 +327,10 @@ final class TypeNodeResolver
                 return new CallableType(\null, \null, \true, \null, \null, [], TrinaryLogic::createYes());
             case 'pure-closure':
                 return ClosureType::createPure();
+            case 'static-closure':
+                return new ClosureType(\null, \null, \true, \null, \null, \null, [], [], \null, [], [], \null, \null, \null, TrinaryLogic::createYes());
+            case 'static-pure-closure':
+                return new ClosureType(\null, \null, \true, \null, \null, \null, [], [], [], [], [], \null, \null, \null, TrinaryLogic::createYes());
             case 'resource':
                 $type = $this->tryResolvePseudoTypeClassType($typeNode, $nameScope);
                 if ($type !== null) {
@@ -371,34 +378,34 @@ final class TypeNodeResolver
             case '__stringnotstringable':
                 return new StringNeverAcceptingObjectWithToStringType();
         }
-        if ($nameScope->getClassName() !== null) {
+        if ($nameScope->className !== null) {
             switch (strtolower($typeNode->name)) {
                 case 'self':
-                    return new ObjectType($nameScope->getClassName());
+                    return new ObjectType($nameScope->className);
                 case 'static':
-                    if ($this->getReflectionProvider()->hasClass($nameScope->getClassName())) {
-                        $classReflection = $this->getReflectionProvider()->getClass($nameScope->getClassName());
+                    if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($nameScope->className)) {
+                        $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($nameScope->className);
                         return new StaticType($classReflection);
                     }
                     return new ErrorType();
                 case 'parent':
-                    if ($this->getReflectionProvider()->hasClass($nameScope->getClassName())) {
-                        $classReflection = $this->getReflectionProvider()->getClass($nameScope->getClassName());
+                    if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($nameScope->className)) {
+                        $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($nameScope->className);
                         $parentClass = $classReflection->getNativeReflection()->getParentClass();
                         if ($parentClass !== \false) {
-                            return new ObjectType($parentClass->getName());
+                            return new ObjectType($parentClass->betterReflectionClass->getName());
                         }
                     }
                     return new NonexistentParentClassType();
             }
         }
-        if (!$nameScope->shouldBypassTypeAliases()) {
-            $typeAlias = $this->getTypeAliasResolver()->resolveTypeAlias($typeNode->name, $nameScope);
+        if (!$nameScope->bypassTypeAliases) {
+            $typeAlias = $this->typeAliasResolverProvider->getTypeAliasResolver()->resolveTypeAlias($typeNode->name, $nameScope);
             if ($typeAlias !== null) {
                 return $typeAlias;
             }
         }
-        $templateType = $nameScope->resolveTemplateTypeName($typeNode->name);
+        $templateType = $nameScope->templateTypeMap->getType($typeNode->name);
         if ($templateType !== null) {
             return $templateType;
         }
@@ -406,7 +413,7 @@ final class TypeNodeResolver
         if (str_contains($stringName, '-') && !str_starts_with($stringName, 'OCI-')) {
             return new ErrorType();
         }
-        if ($this->mightBeConstant($typeNode->name) && !$this->getReflectionProvider()->hasClass($stringName)) {
+        if (\preg_match('((?:^|\\\\)[A-Z_][A-Z0-9_]*$)', $typeNode->name) > 0 && !$this->reflectionProviderProvider->getReflectionProvider()->hasClass($stringName)) {
             $constType = $this->tryResolveConstant($typeNode->name, $nameScope);
             if ($constType !== null) {
                 return $constType;
@@ -434,21 +441,21 @@ final class TypeNodeResolver
         if ($nameScope->hasUseAlias($typeNode->name)) {
             return new ObjectType($nameScope->resolveStringName($typeNode->name));
         }
-        if ($nameScope->getNamespace() === null) {
+        if ($nameScope->namespace === null) {
             return null;
         }
         $className = $nameScope->resolveStringName($typeNode->name);
-        if ($this->getReflectionProvider()->hasClass($className)) {
+        if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($className)) {
             return new ObjectType($className);
         }
         return null;
     }
-    private function resolveThisTypeNode(ThisTypeNode $typeNode, NameScope $nameScope): Type
+    private function resolveThisTypeNode(NameScope $nameScope): Type
     {
-        $className = $nameScope->getClassName();
+        $className = $nameScope->className;
         if ($className !== null) {
-            if ($this->getReflectionProvider()->hasClass($className)) {
-                return new ThisType($this->getReflectionProvider()->getClass($className));
+            if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($className)) {
+                return new ThisType($this->reflectionProviderProvider->getReflectionProvider()->getClass($className));
             }
         }
         return new ErrorType();
@@ -664,8 +671,8 @@ final class TypeNodeResolver
             }
             return new ErrorType();
         } elseif ($mainTypeName === 'static') {
-            if ($nameScope->getClassName() !== null && $this->getReflectionProvider()->hasClass($nameScope->getClassName())) {
-                $classReflection = $this->getReflectionProvider()->getClass($nameScope->getClassName());
+            if ($nameScope->className !== null && $this->reflectionProviderProvider->getReflectionProvider()->hasClass($nameScope->className)) {
+                $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($nameScope->className);
                 return new GenericStaticType($classReflection, $genericTypes, null, $variances);
             }
             return new ErrorType();
@@ -680,10 +687,10 @@ final class TypeNodeResolver
         }
         $mainTypeClassName = $mainTypeObjectClassNames[0] ?? null;
         if ($mainTypeClassName !== null) {
-            if (!$this->getReflectionProvider()->hasClass($mainTypeClassName)) {
+            if (!$this->reflectionProviderProvider->getReflectionProvider()->hasClass($mainTypeClassName)) {
                 return new GenericObjectType($mainTypeClassName, $genericTypes, \null, \null, $variances);
             }
-            $classReflection = $this->getReflectionProvider()->getClass($mainTypeClassName);
+            $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($mainTypeClassName);
             if ($classReflection->isGeneric()) {
                 $templateTypes = array_values($classReflection->getTemplateTypeMap()->getTypes());
                 for ($i = count($genericTypes), $templateTypesCount = count($templateTypes); $i < $templateTypesCount; $i++) {
@@ -786,17 +793,22 @@ final class TypeNodeResolver
             }
             return new NativeParameterReflection($parameterName, $parameterNode->isOptional || $parameterNode->isVariadic, $this->resolve($parameterNode->type, $nameScope), $parameterNode->isReference ? PassedByReference::createCreatesNewVariable() : PassedByReference::createNo(), $parameterNode->isVariadic, null);
         }, $typeNode->parameters));
-        $returnType = $this->resolve($typeNode->returnType, $nameScope);
+        $assertions = $this->resolveCallableReturnTypeAssertions($typeNode, $nameScope, $parameters);
+        if ($assertions !== null) {
+            $returnType = new BooleanType();
+        } else {
+            $returnType = $this->resolve($typeNode->returnType, $nameScope);
+        }
         if ($mainType instanceof CallableType) {
             $pure = $mainType->isPure();
             if ($pure->yes() && $returnType->isVoid()->yes()) {
                 return new ErrorType();
             }
-            return new CallableType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, $templateTags, $pure);
+            return new CallableType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, $templateTags, $pure, $assertions);
         } elseif ($mainType instanceof ObjectType && $mainType->getClassName() === Closure::class) {
-            return new ClosureType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, \null, $templateTags, [], [new SimpleImpurePoint('functionCall', 'call to a Closure', \false)]);
+            return new ClosureType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, \null, $templateTags, [], [new SimpleImpurePoint('functionCall', 'call to a Closure', \false)], [], [], \null, \null, $assertions);
         } elseif ($mainType instanceof ClosureType) {
-            $closure = new ClosureType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, \null, $templateTags, [], $mainType->getImpurePoints(), $mainType->getInvalidateExpressions(), $mainType->getUsedVariables(), $mainType->acceptsNamedArguments(), $mainType->mustUseReturnValue());
+            $closure = new ClosureType($parameters, $returnType, $isVariadic, $templateTypeMap, \null, \null, $templateTags, [], $mainType->getImpurePoints(), $mainType->getInvalidateExpressions(), $mainType->getUsedVariables(), $mainType->acceptsNamedArguments(), $mainType->mustUseReturnValue(), $assertions, $mainType->isStaticClosure());
             if ($closure->isPure()->yes() && $returnType->isVoid()->yes()) {
                 return new ErrorType();
             }
@@ -804,74 +816,51 @@ final class TypeNodeResolver
         }
         return new ErrorType();
     }
+    /**
+     * Interprets a conditional return type referencing the callable's own parameter,
+     * like `callable(mixed $value): ($value is int ? true : false)`, as a type predicate.
+     *
+     * @param list<NativeParameterReflection> $parameters
+     */
+    private function resolveCallableReturnTypeAssertions(CallableTypeNode $typeNode, NameScope $nameScope, array $parameters): ?Assertions
+    {
+        $returnTypeNode = $typeNode->returnType;
+        if (!$returnTypeNode instanceof ConditionalTypeForParameterNode) {
+            return null;
+        }
+        foreach ($parameters as $parameter) {
+            if ('$' . $parameter->getName() !== $returnTypeNode->parameterName) {
+                continue;
+            }
+            return CallableAssertionsHelper::createAssertionsFromConditional($returnTypeNode->parameterName, $this->resolve($returnTypeNode->targetType, $nameScope), $returnTypeNode->negated, $this->resolve($returnTypeNode->if, $nameScope), $this->resolve($returnTypeNode->else, $nameScope));
+        }
+        return null;
+    }
     private function resolveArrayShapeNode(ArrayShapeNode $typeNode, NameScope $nameScope): Type
     {
-        $builder = ConstantArrayTypeBuilder::createEmpty();
-        $builder->disableArrayDegradation();
-        $explicitKeyValues = [];
+        $items = [];
         foreach ($typeNode->items as $itemNode) {
-            if ($itemNode->valueType instanceof CallableTypeNode) {
-                $builder->disableClosureDegradation();
-            }
-            $offsetType = $this->resolveArrayShapeOffsetType($itemNode, $nameScope);
-            if ($offsetType instanceof ConstantIntegerType || $offsetType instanceof ConstantStringType) {
-                $explicitKeyValues[] = $offsetType->getValue();
-            }
-            $builder->setOffsetValueType($offsetType, $this->resolve($itemNode->valueType, $nameScope), $itemNode->optional);
+            $items[] = [$this->resolveArrayShapeOffsetType($itemNode, $nameScope), $this->resolve($itemNode->valueType, $nameScope), $itemNode->optional];
         }
-        $isList = in_array($typeNode->kind, [ArrayShapeNode::KIND_LIST, ArrayShapeNode::KIND_NON_EMPTY_LIST], \true);
+        $unsealed = null;
         if (!$typeNode->sealed) {
-            if ($typeNode->unsealedType === null) {
-                if ($isList) {
-                    $unsealedKeyType = IntegerRangeType::createAllGreaterThanOrEqualTo(0);
-                } else {
-                    $unsealedKeyType = (new BenevolentUnionType([new IntegerType(), new StringType()]))->toArrayKey();
-                }
-                $builder->makeUnsealed($unsealedKeyType, new MixedType());
-            } else {
-                if ($typeNode->unsealedType->keyType === null) {
-                    if ($isList) {
-                        $unsealedKeyType = IntegerRangeType::createAllGreaterThanOrEqualTo(0);
-                    } else {
-                        $unsealedKeyType = (new BenevolentUnionType([new IntegerType(), new StringType()]))->toArrayKey();
-                    }
-                } else {
-                    $unsealedKeyType = $this->transformUnsafeArrayKey($this->resolve($typeNode->unsealedType->keyType, $nameScope));
-                }
-                $unsealedKeyFiniteTypes = $unsealedKeyType->getFiniteTypes();
-                $unsealedValueType = $this->resolve($typeNode->unsealedType->valueType, $nameScope);
-                if (count($unsealedKeyFiniteTypes) > 0) {
-                    foreach ($unsealedKeyFiniteTypes as $unsealedKeyFiniteType) {
-                        // Explicit keys own their slot — the unsealed extras
-                        // describe entries at keys NOT in the explicit set.
-                        if (($unsealedKeyFiniteType instanceof ConstantIntegerType || $unsealedKeyFiniteType instanceof ConstantStringType) && in_array($unsealedKeyFiniteType->getValue(), $explicitKeyValues, \true)) {
-                            continue;
-                        }
-                        $builder->setOffsetValueType($unsealedKeyFiniteType, $unsealedValueType, \true);
-                    }
-                } else {
-                    $builder->makeUnsealed($unsealedKeyType, $unsealedValueType);
-                }
-            }
+            // A key type that is not written down is derived from the shape kind
+            // when the shape gets built, so that it can be printed back as `...`.
+            $unsealedKeyType = $typeNode->unsealedType === null || $typeNode->unsealedType->keyType === null ? null : $this->transformUnsafeArrayKey($this->resolve($typeNode->unsealedType->keyType, $nameScope));
+            $unsealedValueType = $typeNode->unsealedType === null ? new MixedType() : $this->resolve($typeNode->unsealedType->valueType, $nameScope);
+            $unsealed = [$unsealedKeyType, $unsealedValueType];
         }
-        $arrayType = $builder->getArray();
-        $accessories = [];
-        if ($isList) {
-            $accessories[] = new AccessoryArrayListType();
-        }
-        if (in_array($typeNode->kind, [ArrayShapeNode::KIND_NON_EMPTY_ARRAY, ArrayShapeNode::KIND_NON_EMPTY_LIST], \true)) {
-            $accessories[] = new NonEmptyArrayType();
-        }
-        if (count($accessories) > 0) {
-            return TypeCombinator::intersect($arrayType, ...$accessories);
-        }
-        return $arrayType;
+        return LateResolvableArrayShapeType::create($items, $unsealed, $typeNode->kind);
     }
     private function resolveArrayShapeOffsetType(ArrayShapeItemNode $itemNode, NameScope $nameScope): ?Type
     {
         if ($itemNode->keyName instanceof ConstExprIntegerNode) {
             return new ConstantIntegerType((int) $itemNode->keyName->value);
         } elseif ($itemNode->keyName instanceof IdentifierTypeNode) {
+            $templateType = $nameScope->templateTypeMap->getType($itemNode->keyName->name);
+            if ($templateType !== null) {
+                return $templateType;
+            }
             return new ConstantStringType($itemNode->keyName->name);
         } elseif ($itemNode->keyName instanceof ConstExprStringNode) {
             return new ConstantStringType($itemNode->keyName->value);
@@ -882,18 +871,18 @@ final class TypeNodeResolver
                 // global constant should get parsed as class name in IdentifierTypeNode
             }
             $isStatic = \false;
-            if ($nameScope->getClassName() !== null) {
+            if ($nameScope->className !== null) {
                 switch (strtolower($constExpr->className)) {
                     case 'static':
-                        $className = $nameScope->getClassName();
+                        $className = $nameScope->className;
                         $isStatic = \true;
                         break;
                     case 'self':
-                        $className = $nameScope->getClassName();
+                        $className = $nameScope->className;
                         break;
                     case 'parent':
-                        if ($this->getReflectionProvider()->hasClass($nameScope->getClassName())) {
-                            $classReflection = $this->getReflectionProvider()->getClass($nameScope->getClassName());
+                        if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($nameScope->className)) {
+                            $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($nameScope->className);
                             if ($classReflection->getParentClass() === null) {
                                 return new ErrorType();
                             }
@@ -905,14 +894,20 @@ final class TypeNodeResolver
             if (!isset($className)) {
                 $className = $nameScope->resolveStringName($constExpr->className);
             }
-            if (!$this->getReflectionProvider()->hasClass($className)) {
+            if (!$this->reflectionProviderProvider->getReflectionProvider()->hasClass($className)) {
                 return new ErrorType();
             }
-            $classReflection = $this->getReflectionProvider()->getClass($className);
+            $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($className);
             if ($isStatic && $classReflection->isFinal()) {
                 $isStatic = \false;
             }
             $constantName = $constExpr->name;
+            if (strtolower($constantName) === 'class') {
+                if ($isStatic) {
+                    return new GenericClassStringType(new StaticType($classReflection));
+                }
+                return new ConstantStringType($classReflection->getName(), \true);
+            }
             if (!$classReflection->hasConstant($constantName)) {
                 return new ErrorType();
             }
@@ -924,7 +919,7 @@ final class TypeNodeResolver
                 return new ErrorType();
             }
             $declaringClass = $reflectionConstant->getDeclaringClass();
-            return $this->initializerExprTypeResolver->getType($reflectionConstant->getValueExpression(), InitializerExprContext::fromClass($declaringClass->getName(), $declaringClass->getFileName() ?: null));
+            return $this->initializerExprTypeResolver->getType($reflectionConstant->betterClassConstantOrEnumCase->getValueExpression(), InitializerExprContext::fromClass($declaringClass->betterReflectionClass->getName(), $declaringClass->getFileName() ?: null));
         } elseif ($itemNode->keyName !== null) {
             throw new ShouldNotHappenException('Unsupported key node type: ' . get_class($itemNode->keyName));
         }
@@ -964,18 +959,18 @@ final class TypeNodeResolver
                 // global constant should get parsed as class name in IdentifierTypeNode
             }
             $isStatic = \false;
-            if ($nameScope->getClassName() !== null) {
+            if ($nameScope->className !== null) {
                 switch (strtolower($constExpr->className)) {
                     case 'static':
-                        $className = $nameScope->getClassName();
+                        $className = $nameScope->className;
                         $isStatic = \true;
                         break;
                     case 'self':
-                        $className = $nameScope->getClassName();
+                        $className = $nameScope->className;
                         break;
                     case 'parent':
-                        if ($this->getReflectionProvider()->hasClass($nameScope->getClassName())) {
-                            $classReflection = $this->getReflectionProvider()->getClass($nameScope->getClassName());
+                        if ($this->reflectionProviderProvider->getReflectionProvider()->hasClass($nameScope->className)) {
+                            $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($nameScope->className);
                             if ($classReflection->getParentClass() === null) {
                                 return new ErrorType();
                             }
@@ -985,22 +980,48 @@ final class TypeNodeResolver
                 }
             }
             if (!isset($className)) {
+                $templateType = $nameScope->templateTypeMap->getType($constExpr->className);
+                if ($templateType instanceof TemplateType) {
+                    if (strtolower($constExpr->name) === 'class') {
+                        return new GenericClassStringType($templateType);
+                    }
+                    // A template bound to a final class can only be that class. Any other can be a class
+                    // declaring constants its bound does not - known once the template is resolved.
+                    $boundClassReflections = $templateType->getBound()->getObjectClassReflections();
+                    if (count($boundClassReflections) !== 1 || !$boundClassReflections[0]->isFinal()) {
+                        return new ClassConstantAccessType($templateType, $constExpr->name);
+                    }
+                    $className = $boundClassReflections[0]->getName();
+                }
+            }
+            if (!isset($className)) {
                 $className = $nameScope->resolveStringName($constExpr->className);
             }
-            if (!$this->getReflectionProvider()->hasClass($className)) {
+            if (!$this->reflectionProviderProvider->getReflectionProvider()->hasClass($className)) {
                 return new ErrorType();
             }
-            $classReflection = $this->getReflectionProvider()->getClass($className);
+            $classReflection = $this->reflectionProviderProvider->getReflectionProvider()->getClass($className);
             if ($isStatic && $classReflection->isFinal()) {
                 $isStatic = \false;
             }
             $constantName = $constExpr->name;
+            if (strtolower($constantName) === 'class') {
+                if ($isStatic) {
+                    return new GenericClassStringType(new StaticType($classReflection));
+                }
+                return new ConstantStringType($classReflection->getName(), \true);
+            }
+            // A class that is not final can have subclasses declaring constants it does not - what
+            // static:: stands for is known once static is resolved.
+            if ($isStatic) {
+                return new ClassConstantAccessType(new StaticType($classReflection), $constantName);
+            }
             if (Strings::contains($constantName, '*')) {
                 // convert * into .*? and escape everything else so the constants can be matched against the pattern
                 $pattern = '{^' . str_replace('\*', '.*?', preg_quote($constantName)) . '$}D';
                 $constantTypes = [];
                 foreach ($classReflection->getNativeReflection()->getReflectionConstants() as $reflectionConstant) {
-                    $classConstantName = $reflectionConstant->getName();
+                    $classConstantName = $reflectionConstant->betterClassConstantOrEnumCase->getName();
                     if (Strings::match($classConstantName, $pattern) === null) {
                         continue;
                     }
@@ -1008,11 +1029,11 @@ final class TypeNodeResolver
                         $constantTypes[] = new EnumCaseObjectType($classReflection->getName(), $classConstantName);
                         continue;
                     }
-                    $declaringClassName = $reflectionConstant->getDeclaringClass()->getName();
-                    if (!$this->getReflectionProvider()->hasClass($declaringClassName)) {
+                    $declaringClassName = $reflectionConstant->getDeclaringClass()->betterReflectionClass->getName();
+                    if (!$this->reflectionProviderProvider->getReflectionProvider()->hasClass($declaringClassName)) {
                         continue;
                     }
-                    $constantTypes[] = $this->initializerExprTypeResolver->getType($reflectionConstant->getValueExpression(), InitializerExprContext::fromClassReflection($this->getReflectionProvider()->getClass($declaringClassName)));
+                    $constantTypes[] = $this->initializerExprTypeResolver->getType($reflectionConstant->betterClassConstantOrEnumCase->getValueExpression(), InitializerExprContext::fromClassReflection($this->reflectionProviderProvider->getReflectionProvider()->getClass($declaringClassName)));
                 }
                 if (count($constantTypes) === 0) {
                     return new ErrorType();
@@ -1025,15 +1046,12 @@ final class TypeNodeResolver
             if ($classReflection->isEnum() && $classReflection->hasEnumCase($constantName)) {
                 return new EnumCaseObjectType($classReflection->getName(), $constantName);
             }
-            if ($isStatic) {
-                return new ClassConstantAccessType(new StaticType($classReflection), $constantName);
-            }
             $reflectionConstant = $classReflection->getNativeReflection()->getReflectionConstant($constantName);
             if ($reflectionConstant === \false) {
                 return new ErrorType();
             }
             $declaringClass = $reflectionConstant->getDeclaringClass();
-            return $this->initializerExprTypeResolver->getType($reflectionConstant->getValueExpression(), InitializerExprContext::fromClass($declaringClass->getName(), $declaringClass->getFileName() ?: null));
+            return $this->initializerExprTypeResolver->getType($reflectionConstant->betterClassConstantOrEnumCase->getValueExpression(), InitializerExprContext::fromClass($declaringClass->betterReflectionClass->getName(), $declaringClass->getFileName() ?: null));
         }
         if ($constExpr instanceof ConstExprFloatNode) {
             return new ConstantFloatType((float) $constExpr->value);

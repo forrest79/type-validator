@@ -258,7 +258,9 @@ According to https://github.com/phpstan/phpstan/blob/2.1.x/website/src/writing-p
 - `callable(float...): (int|null)` ❌
 - `\Closure(int, int): string` ❌
 - `pure-callable(int, int): string` ❌
-- `pure-Closure(int, int): string` ❌
+- `pure-closure(int, int): string` ❌
+- `static-closure(int, int): string` ❌
+- `static-pure-closure(int, int): string` ❌
 
 #### Bottom type 🚫
 
